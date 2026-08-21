@@ -1,0 +1,245 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.82in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref,microtype,enumitem,array}
+\usepackage[T1]{fontenc}
+\title{Selective Residual Computation: Refinement, Interference, Goal Modulation, and Sufficient Activation}
+\author{Jorge Sim\~ao}
+\date{Paper 1 research draft --- revised August 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Most deep-learning evaluation measures behavioral competence rather than internal computation. We propose a mechanism-first comparative program in which trained language models are treated as experimental cognitive systems. Paper 1 focuses on residual computation and asks whether depth primarily implements progressive refinement, complementary computation, destructive interference followed by repair, or task-dependent mixtures of these. A common metric framework covers memory activation, attention dilution, residual dynamics, multiscale temporal stability, head/layer organization, and standard ML/DL and systems metrics. The core experiments first characterize unmodified tiny Transformers using causal block utility and counterfactual goal manipulations. Only after the baseline phenomenon is established do we introduce goal-conditioned residual gating and a shared distributed goal latent. The architecture is therefore an experimental intervention rather than a predetermined contribution. We test the stronger sufficient-activation hypothesis that contextually unnecessary computation can be both costly and harmful, so selective inhibition may improve task quality while reducing active computation. The final paper claim is explicitly allowed to move toward whichever mechanistic result is best supported.
+\end{abstract}
+
+\section{Scientific objective}
+A theory of artificial and natural cognition requires more than loss, accuracy, exact match, or F1. Two systems can achieve similar outputs while using different memory, temporal, representational, and control dynamics. Conversely, similar computational principles may recur in systems with different learning rules or architectures.
+
+We therefore treat trained neural networks as experimental cognitive systems and ask:
+\begin{enumerate}[leftmargin=*]
+\item What information becomes active?
+\item What transformations become active?
+\item How do representations evolve across token time and model depth?
+\item When do successive residual updates refine, complement, or interfere with one another?
+\item Can a distributed task/goal state predict which transformations will be useful?
+\item Can task-dependent inhibition become real computation skipping?
+\item Which findings survive changes in architecture, scale, or learning rule?
+\end{enumerate}
+
+Backpropagation is initially held fixed as an experimental convenience, not as a biological claim. This lets us investigate architecture, task ecology, memory activation, residual dynamics, goal encoding, and online control before replacing global learning with local learning rules. The longer-term comparison is Transformer+BP versus alternative architectures versus local-rule systems versus biological measurements.
+
+\section{Mechanistic measurement framework}
+Let $h_{l,t}\in\mathbb{R}^d$ be the residual representation at layer $l$ and token position $t$, and define
+\[
+\Delta_{l,t}=h_{l+1,t}-h_{l,t}.
+\]
+The metric battery is deliberately broad, but each family must discriminate among mechanistic hypotheses rather than become an interpretability dashboard.
+
+\subsection{Memory activation}
+Reuse PRA-style measurements wherever the architecture exposes retrievable or materialized memory: active/available KV ratio, retrieved references/chunks/gists, supporting-fact recall, routing precision/recall/rank, evidence coverage, materialization breadth, and task quality versus active-memory budget.
+
+A central cross-line hypothesis is that memory utility need not be monotonic:
+\[
+Q(k+1)<Q(k)
+\]
+may occur when additional materialized memory introduces distraction or representational interference. Sparse activation may therefore be functionally superior rather than merely cheaper.
+
+\subsection{Attention concentration and dilution}
+Measure attention entropy, effective support
+\[
+N_{\rm eff}=\exp\!\left(-\sum_i\alpha_i\log\alpha_i\right),
+\]
+top-$k$ mass, evidence mass, distance profile, concentration indices, head similarity, and changes with prompt, context, or memory size. Attention describes interaction structure; it is not treated as a complete causal explanation.
+
+\subsection{Residual refinement, complementarity, and interference}
+Use update norms and cosines, covariance, CKA/RSA, subspace angles, task-variable decodability, logit trajectories, and causal ablation.
+
+\paragraph{Refinement.} Successive updates improve a common evolving representation or response. Candidate evidence includes monotonic increase in correct-answer margin, increasing decodability of task-relevant variables, and positive causal utility of successive blocks.
+
+\paragraph{Complementarity.} A layer adds useful information without substantially undoing prior computation. Candidate signatures include low update alignment, increased representational rank or new decodable factors, and positive causal utility for both earlier and later transformations.
+
+\paragraph{Interference.} A transformation creates a state that later computation must repair, or its removal improves performance in a task-dependent way. For block $F_l$ and task family $\tau$ define
+\[
+U_l(\tau)=Q_\tau({\rm full})-Q_\tau({\rm skip}\ l).
+\]
+Then $U_l>0$ is useful, $U_l\approx0$ redundant, and $U_l<0$ a candidate harmful transformation.
+
+Strong evidence for interference requires three conditions:
+\begin{enumerate}[leftmargin=*]
+\item statistically reliable negative task-conditioned utility $U_l(\tau)<0$;
+\item evidence that later computation reverses, compensates for, or repairs the affected trajectory;
+\item replication across examples and seeds, not an isolated ablation artifact.
+\end{enumerate}
+Geometry alone is never sufficient to label a transformation harmful.
+
+\subsection{Temporal and multiscale stability}
+Token position provides a temporal axis distinct from model depth. We characterize input embeddings, hidden states, heads, features, and learned subspaces over multiple windows $W$.
+
+For each feature/subspace compute rolling mean, variance, skewness, kurtosis and their first/second differences; adjacent and separated chunk distribution distances; covariance and correlation-matrix drift; autocorrelation function (ACF) and ACF drift; lagged cross-correlation between features, heads, and layers; effective correlation length; CKA/RSA across temporal windows; principal-subspace and eigenspectrum drift; and layer$\times$scale$\times$token-position stability maps.
+
+We explicitly search for \emph{amplification--repair} events: a perturbation, task conflict, or nonstationarity grows at one layer and is reduced at a later layer. Multiple temporal spans are required because local windows can appear stationary while longer windows reveal topic, goal, or discourse transitions.
+
+\subsection{Head and layer organization}
+For any representation, attention, temporal, or causal similarity metric $M$, compare
+\[
+\mathbb{E}[M(\text{heads within a layer})]
+\quad\text{with}\quad
+\mathbb{E}[M(\text{heads across layers})].
+\]
+Add variance decomposition by layer/head/task, clustering, specialization, redundancy, causal ablation utility, and temporal stability. This tests whether functional organization is primarily layered, head-specific, task-specific, or distributed.
+
+\subsection{Conventional ML/DL and systems metrics}
+Retain loss/perplexity, accuracy, EM, precision, recall, F1, calibration, output entropy, logit margin, gradient norms and directions, weight norms, activation norms, update-to-weight ratios, training stability, FLOPs, realized latency, memory use, throughput, and active-block fraction. Internal metrics are scientifically useful only when connected to competence, robustness, or resource cost.
+
+\section{Datasets and task ecology}
+Dataset structure is part of the causal experiment. Paper 1 remains in NLP/token streams. Mazes, Sudoku, 2-D environments, and embodied agent tasks are deferred to a separate paper.
+
+\subsection{Synthetic natural-language counterfactual mixtures}
+The basic unit is a \emph{counterfactual task family}. Construct content objects $C_i$ that support multiple plausible intentions $I_j$:
+\[
+(C_i,I_j)\rightarrow Y_{ij}.
+\]
+The same content is reused for answering, explaining, extracting, classifying, critiquing, transforming, checking, planning, and action-selection-like textual responses.
+
+Task identity must not collapse to a discrete \texttt{MODE} token. Use paraphrased and implicit instructions; goal evidence distributed across conversational context; audience, style, safety, resource, and output constraints; conflicting local affordances; controlled distance between goal-defining evidence and response-affording content; semantically continuous task families; distractors; and same-content/different-goal and same-goal/different-content counterfactuals.
+
+Define a controllable \emph{goal identifiability} variable measuring how strongly local lexical cues reveal the intended task. This allows direct tests of whether interference increases when the task must be inferred from distributed context. Ground-truth latent task factors are retained for probing and causal evaluation only.
+
+\subsection{PRA continuity datasets}
+Use WikiText-2, WikiText-103, HotpotQA, and QASPER where feasible. WikiText supports unconstrained token dynamics and temporal stability analysis; HotpotQA provides supporting-fact supervision for memory/evidence activation; QASPER provides long scientific-document QA. Reuse creates direct continuity with PRA routing, attention dilution, materialization, and long-context measurements.
+
+\section{Architectures and experimental priority}
+All architectures should expose a common instrumentation interface for embeddings, residual pre/post states, attention outputs/weights, MLP outputs, per-head outputs where feasible, logits, gradients, and architecture-specific latent states.
+
+\subsection{Core discovery models}
+The mandatory first-cycle matrix is:
+\begin{enumerate}[leftmargin=*]
+\item tiny decoder-only Transformer;
+\item tiny Transformer + residual gates;
+\item tiny Transformer + shared goal latent $z$;
+\item tiny Transformer + $z$-conditioned residual gates.
+\end{enumerate}
+Tiny models are the mechanism-discovery environment because they permit exhaustive block ablation, many seeds, dense metric capture, and controlled architectural intervention.
+
+\subsection{Selective pretrained transfer}
+Begin with a small open pretrained family already supported by the PRA/Qwen infrastructure. Do not initially repeat the full tiny-model experiment matrix. Transfer only the strongest qualitative findings from the tiny-model phase.
+
+\subsection{Conditional comparators}
+TRM, mHC, Mixture-of-Depths, LayerSkip, or other third-party architectures are conditional rather than mandatory for the first cycle. Choose based on the observed phenomenon: mHC if residual interference dominates; MoD/LayerSkip if conditional compute dominates; TRM if iterative refinement dominates.
+
+\section{Novel experimental mechanisms}
+The mechanisms are modular interventions, not assumed contributions.
+
+\subsection{Goal-conditioned residual gating}
+Replace
+\[
+h_{l+1}=h_l+F_l(h_l)
+\]
+with
+\[
+h_{l+1}=h_l+g_l(z)F_l(h_l).
+\]
+Start with scalar/block gates for causal clarity. Soft gates test modulation. Thresholded gates test actual skipping:
+\[
+g_l(z)<\epsilon \Rightarrow F_l\text{ is not executed}.
+\]
+
+\subsection{Shared distributed goal latent}
+Introduce
+\[
+z_{l+1}=z_l+G_l(z_l,h_l).
+\]
+The goal latent is not supervised as a one-hot task identifier. It is learned through the task objective; probes are measurement devices. A key criterion is stronger than task classification: $z$ should predict future causal utility,
+\[
+z \rightarrow \widehat{U_l(\tau)}.
+\]
+If $z$ only encodes task semantics but cannot predict downstream computational requirements, it should not be interpreted as a useful control state.
+
+\subsection{Required goal-state controls}
+Compare $z$ against current ordinary residual state $h_l$; pooled residual summaries over earlier layers/tokens; matched-dimensional random vectors with matched first/second-order statistics; shuffled-goal counterfactuals; a gate-only model; and a $z$-only model. These controls distinguish a genuine control state from generic additional capacity or dynamic sparsity.
+
+\subsection{Combined functional top-down modulation}
+Use
+\[
+h_{l+1}=h_l+g_l(z_l)F_l(h_l),\qquad
+z_{l+1}=z_l+G_l(z_l,h_l).
+\]
+``Top-down'' is functional rather than literal backward layer connectivity: globally integrated task state regulates more local transformations.
+
+\subsection{Sufficient activation objective}
+Use
+\[
+\mathcal{L}=\mathcal{L}_{task}+\lambda\sum_l c_l\phi(g_l)
+\]
+and sweep $\lambda$. The strong hypothesis is not merely quality preservation under reduced compute. It is the existence of $C_1\subset C_2$ such that
+\[
+{\rm Cost}(C_1)<{\rm Cost}(C_2),\qquad Q(C_1)>Q(C_2).
+\]
+This is the computation-side analogue of selective memory materialization.
+
+\section{Staged experimental protocol}
+\subsection{Core E1: baseline residual map}
+Train tiny baseline models across seeds; capture the common metric battery; exhaustively skip individual blocks and selected groups; compute $U_l(\tau)$; identify useful, redundant, and candidate harmful blocks; search for later repair; and measure task decodability, logit trajectories, attention dilution, head/layer similarity, and temporal stability. E1 establishes whether there is an architectural pathology worth fixing.
+
+\subsection{Core E2: counterfactual goal manipulation}
+Hold $C$ fixed while changing distributed intent $I$. Measure
+\[
+\Delta h_l=h_l(C,I_1)-h_l(C,I_2),
+\]
+block utility, attention, logits, temporal statistics, and goal identifiability. Test whether task-conditioned utility changes systematically as goal evidence becomes less locally obvious.
+
+\subsection{Core E3: gated residual stream}
+Train matched baseline and gated tiny models. Compare task quality, harmful-block activation, repair signatures, gate entropy, task dependence, active FLOPs, realized latency where possible, and distractor robustness. Compare with random skipping, static task routes, magnitude/norm heuristics, and matched-capacity ungated controls.
+
+\subsection{Secondary E4: shared goal latent}
+Train $z$ without gates. Test semantic organization, task-switch tracking, and especially prediction of future $U_l(\tau)$. Compare to residual/pooling/random controls.
+
+\subsection{Secondary E5: combined modulation}
+Combine $z$ and gates. Test whether gates suppress blocks independently identified by E1 as harmful or redundant rather than simply learning arbitrary sparse routes.
+
+\subsection{Conditional E6: hard skipping and sufficient activation}
+Only after soft-gating structure is understood, convert strong inhibition into real execution skipping. Sweep $\epsilon$ and $\lambda$. Report Pareto fronts over quality, active FLOPs, realized latency, and measured interference.
+
+\subsection{Conditional E7: architecture transfer}
+Transfer the strongest mechanistic signatures to a small pretrained Transformer and to whichever alternative architecture best matches the dominant finding.
+
+\subsection{Conditional E8: PRA memory--computation interaction}
+Where PRA is available, factorially vary memory materialization and active computation:
+\[
+Q=Q(k_{\rm memory},k_{\rm compute}).
+\]
+Test whether excess memory increases residual interference and whether goal modulation changes optimal retrieval breadth.
+
+\section{Primary claims, decision rules, and falsification}
+The paper starts with three nested claims.
+
+\paragraph{Primary mechanistic claim.} Residual blocks have task-dependent causal roles that can include refinement, complementarity, redundancy, and possibly harmful interference.
+
+\paragraph{Secondary control claim.} Distributed task/goal state predicts some variation in downstream block utility.
+
+\paragraph{Stretch architectural claim.} Goal-conditioned modulation exploits that structure to reduce interference and/or active computation, potentially improving both quality and cost.
+
+After E1--E4, choose the paper center by explicit decision rule:
+\begin{itemize}[leftmargin=*]
+\item strong harmful/repaired block effects but weak gating $\Rightarrow$ interference characterization;
+\item strong goal-conditioned utility prediction $\Rightarrow$ distributed task-control state;
+\item strong modulation with quality gains $\Rightarrow$ goal-modulated residual computation;
+\item quality improves while compute falls $\Rightarrow$ sufficient/selective activation;
+\item weak/null effects $\Rightarrow$ comparative residual dynamics/falsification, with unsupported architecture claims removed.
+\end{itemize}
+
+Negative results are part of the design. If harmful blocks are rare, the interference hypothesis is weakened. If $z$ does not beat ordinary residual summaries for predicting utility, the shared-control-state hypothesis is weakened. If gating only saves compute without changing interference, position it as conditional computation rather than cognitive control.
+
+\section{Theory-building scope}
+The broader program separates resources and timescales. PRA asks which memory becomes active. Selective residual computation asks which transformations become active moment-by-moment, token-by-token, sequence-by-sequence, or task-by-task. Neural Modules concern dynamic assembly of large functional areas at coarser task/session scales. Tree-of-Experts concerns developmental differentiation of the repertoire. Local learning rules ask how those repertoires and control structures are acquired.
+
+These mechanisms may instantiate a common candidate \emph{Principle of Sufficient Activation}: under contextual constraints, an adaptive system should activate only the memory, computation, or functional resources sufficient for the current task. Biological energy constraints motivate this principle, but Paper 1 treats it as a falsifiable computational hypothesis rather than a biological conclusion.
+
+\section{Positioning and follow-on work}
+This is not primarily an interpretability paper. Metrics are instruments for mechanism discovery and architecture design. The broad instrumentation layer is intended to survive even if the paper itself narrows.
+
+Related work should cover residual-stream circuits and representation similarity (CKA/RSA/SVCCA); causal ablation and superposition/interference; adaptive computation and dynamic sparsity (ACT, Mixture-of-Depths, LayerSkip/early exit); alternative residual or recursive architectures (mHC/Hyper-Connections, TRM/HRM); MoE routing; and neuroscience on contextual modulation, inhibition, temporal stability, and energy-efficient coding.
+
+Follow-on papers can deepen temporal/stationarity analysis, move to 2-D/algorithmic/agent environments, replicate findings under local learning rules, study joint PRA memory--computation activation, and compare selected metrics with neural data.
+
+\section{Conclusion}
+Paper 1 operationalizes a mechanism-first comparative science of internal computation. It asks what Transformer residual depth actually does, whether task context changes the causal utility of transformations, whether distributed goal state can predict those requirements, and whether selective inhibition can become useful conditional computation. The architecture is subordinate to the scientific result: the paper should ultimately be about the strongest mechanistic regularity discovered.
+\end{document}
