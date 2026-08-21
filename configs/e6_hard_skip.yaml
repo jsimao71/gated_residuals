@@ -1,0 +1,11 @@
+stage: E6
+description: Preregistered eligibility gate for hard skipping and sufficient activation.
+sources:
+  e1: results/e1/summary.json
+  e3: results/e3/summary.json
+  e5: results/e5/summary.json
+eligibility:
+  require_strong_interference_or_quality_gain: true
+  minimum_fraction_gates_below_0_9: 0.1
+  require_e1_aligned_suppression: true
+decision_if_ineligible: do_not_run_threshold_or_lambda_sweep

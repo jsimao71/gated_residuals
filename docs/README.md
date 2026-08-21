@@ -95,6 +95,7 @@ PYTHONPATH=src python scripts/run_e2.py
 PYTHONPATH=src python scripts/run_e3.py
 PYTHONPATH=src python scripts/run_e4.py
 PYTHONPATH=src python scripts/run_e5.py
+PYTHONPATH=src python scripts/run_e6.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -104,6 +105,7 @@ E3 trains the five-seed matched-capacity ungated/gated matrix; pass `--reuse-che
 regenerate its control analyses.
 E4 trains shared-goal and z-only variants and fits validation-to-test future-utility probes.
 E5 runs the prespecified combined goal-conditioned-gating falsification test.
+E6 is an evidence-gated audit; it does not run hard-skip sweeps when prior criteria fail.
 
 ## Released gated-attention comparison
 

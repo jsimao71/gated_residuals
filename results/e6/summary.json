@@ -1,0 +1,13 @@
+{
+  "stage": "E6",
+  "status": "not_run_preregistered_stop",
+  "eligible": false,
+  "evidence": {
+    "strong_interference_supported": false,
+    "gated_accuracy_ci_excludes_zero": false,
+    "fraction_gates_below_0_9": 0.01685185185185185,
+    "e1_aligned_suppression_supported": false
+  },
+  "decision": "do_not_run_threshold_or_lambda_sweep",
+  "scientific_interpretation": "Soft gates provided no selective-inhibition or quality signal; thresholding them would be an unmotivated post-hoc experiment."
+}
