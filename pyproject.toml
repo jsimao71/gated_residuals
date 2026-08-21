@@ -1,0 +1,23 @@
+[project]
+name = "gated-residuals"
+version = "0.1.0"
+description = "Mechanism-first instrumentation for selective residual computation"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "PyYAML>=6.0",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+analysis = ["pandas>=2.0", "pyarrow>=14", "scipy>=1.10"]
+pretrained = ["transformers>=4.46,<5"]
+test = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

@@ -1,0 +1,273 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.82in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref,microtype,enumitem,array}
+\usepackage[T1]{fontenc}
+\microtypesetup{expansion=false}
+
+\title{Selective Computation and Residual Dynamics:\\A Mechanistic Research Program for Neural Cognition}
+\author{Jorge Sim\~ao}
+\date{Paper 0 position draft --- August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Behavioral scores reveal what a neural system accomplishes but underdetermine how it accomplishes it. We propose a research program organized around \emph{selective influence over state dynamics}. \emph{Memory selection} determines which available information participates in a computation; \emph{computational selection} determines which candidate transformations become effective state updates. Attention and retrieval primarily expose the first problem, whereas gated attention, residual modulation, and adaptive depth expose the second. The distinction is operational rather than architectural: each form of selection is defined by a causal question and may be implicit in an ungated model. We specify a shared measurement ontology spanning attention distributions, candidate and effective updates, temporal stability, causal block utility, and task consequences. We also impose an evidence ladder: geometry motivates hypotheses, interventions estimate functional effects, and mechanism labels require replicated causal and temporal evidence. Paper~1 supplies the first falsifiable instantiation in Transformer residual streams. The broader thesis survives only if memory and computational selection make distinct, predictive contributions across tasks and architectures.
+\end{abstract}
+
+\section{Motivation}
+Deep neural networks are usually evaluated by loss, accuracy, exact match, F1, or human preference. These are necessary but insufficient for a science of internal computation. Two systems can produce similar answers while using different memory, temporal, and control dynamics. Conversely, similar computational principles may recur in architectures with different details.
+
+The central object of this paper line is not a specific Transformer trick. It is a broader question:
+\begin{quote}
+Which available influences become effective influences over the system state?
+\end{quote}
+
+This question appears in several forms: attention selects among tokens or memories; retrieval selects among external references; residual blocks propose transformations; gates admit or suppress updates; latent states condition which computations are useful; recurrent or higher-level states modulate lower-level processing.
+
+The proposal is narrower than a general theory of cognition. It does not identify attention with explanation, a low gate with inhibition, or a Transformer component with a biological structure. Instead, it defines quantities and interventions that allow these interpretations to fail. The core unit of analysis is a state transition under a specified task, input, model, and intervention.
+
+\section{Scope and contribution}
+The contribution is a conceptual factorization and an experimental contract. The factorization separates selection among informational sources from selection among candidate state changes. The contract requires exact tensor locations, task-level consequences, matched controls, and explicit null-result pivots. It is intended to complement established work on attention~\cite{vaswani2017attention}, representation comparison~\cite{kornblith2019cka}, causal analysis of internal computations, and adaptive computation~\cite{graves2016act}; it is not a replacement for any of them.
+
+Three levels of claim must remain distinct:
+\begin{enumerate}[leftmargin=*]
+\item \emph{descriptive}: a gate is low, attention is diffuse, or an update is anti-aligned;
+\item \emph{functional}: changing that quantity changes a prespecified task metric;
+\item \emph{mechanistic}: the effect replicates, follows the predicted temporal structure, and defeats plausible controls.
+\end{enumerate}
+
+\section{Dual selection}
+Let $x_l$ denote the state entering a layer, block, or computational module. Let $\mathcal{M}$ denote available information: tokens, key/value states, retrieved chunks, sensory variables, previous internal states, or external references. A memory-selection process produces:
+\[
+M_l = S_M(x_l,\mathcal{M}).
+\]
+A computational mechanism then proposes a candidate transformation:
+\[
+\Delta_l = F_l(x_l,M_l).
+\]
+A computational-selection process decides how much of that candidate transformation becomes effective:
+\[
+g_l = S_C(\mathcal{C}_l),
+\qquad
+x_{l+1}=x_l+g_l\odot\Delta_l.
+\]
+
+This gives the decomposition:
+\[
+\begin{aligned}
+\boxed{\mathrm{available\ information}}
+&\rightarrow \boxed{\mathrm{memory\ selection}}
+\rightarrow \boxed{\mathrm{candidate\ computation}}\\
+&\rightarrow \boxed{\mathrm{computational\ selection}}
+\rightarrow \boxed{\mathrm{state\ update}}.
+\end{aligned}
+\]
+
+This factorization is a measurement model, not a claim that every system contains two discrete modules. $S_M$ and $S_C$ may be learned, fixed, distributed, or only identifiable by intervention. The selected memory $M_l$ may itself be continuous, and $g_l$ may be scalar, headwise, featurewise, tokenwise, blockwise, or a hard execution decision. When no explicit gate exists, computational selection is inferred only from counterfactual changes to candidate transformations.
+
+Memory selection asks:
+\begin{quote}
+Which available information should influence the present computation?
+\end{quote}
+Computational selection asks:
+\begin{quote}
+Which candidate transformation should actually modify the current state?
+\end{quote}
+
+Attention and retrieval primarily address the first question. Gates, residual modulation, top-down control, and adaptive computation primarily address the second.
+
+The two axes form four informative regimes: concentrated memory selection with weak or strong update admission, and diffuse memory selection with weak or strong update admission. A theory in which computational selection merely restates attention concentration predicts that these regimes collapse after conditioning on attention statistics. A genuine dual-selection result requires residual predictive or causal information in one axis after controlling for the other.
+
+\section{Memory selection}
+Transformer attention, sparse attention, cross-attention, retrieval, and PRA-style routing can all be viewed as mechanisms for memory selection. In attention:
+\[
+A=\mathrm{softmax}(QK^\top/\sqrt{d}+M)V
+\]
+selects an interaction pattern over available key/value states. In PRA, the available set may include external references, chunks, anchors, gists, or cached key/value memories.
+
+Important measurements include attention entropy, top-$k$ mass, effective support, evidence mass, active-to-available memory ratio, retrieval precision/recall, and materialization breadth. But memory selection is not automatically useful. Additional retrieved material can increase recall while also increasing distraction or residual interference. Therefore the research program asks whether memory activation should itself be subject to a principle of sufficient activation.
+
+Attention weights are interaction coefficients, not automatically causal attributions. Entropy quantifies concentration, evidence mass quantifies allocation to annotated sources, and retrieval recall quantifies availability; none alone establishes that the selected information improved the output. Evidence is stronger when these observables predict state changes and survive attention or memory interventions.
+
+\section{Computational selection}
+Residual architectures compute candidate transformations. A classical block writes:
+\[
+x_{l+1}=x_l+F_l(x_l).
+\]
+A gated or modulated block writes:
+\[
+x_{l+1}=x_l+g_l\odot F_l(x_l).
+\]
+The gate may be conditioned on several distinct sources:
+\[
+g_l=\sigma(G_l(x_l))
+\]
+for input-conditioned gating,
+\[
+g_l=\sigma(G_l(x_l,z))
+\]
+for latent or goal-conditioned gating, and
+\[
+g_l=\sigma(G_l(x_l,h_k)),\qquad k>l
+\]
+for inter-layer or top-down modulation.
+
+A further class uses consequences of the candidate update:
+\[
+I_l=I(x_l,\Delta_l,\ldots),
+\qquad
+g_l=G(x_l,\Delta_l,I_l).
+\]
+This is interference-aware computational selection.
+
+These mechanisms are complementary rather than exclusive. A general system may condition $g_l$ on local state, latent context, higher-level state, and predicted update consequences:
+\[
+g_l=G(x_l,z,h_{>l},I_l).
+\]
+
+Soft admission and execution skipping must also be separated. Multiplying an already computed update by a small gate can change function without saving the cost of computing $F_l$. Active-FLOP and latency claims require a hard routing implementation and realized systems measurements. Conversely, a soft gate can be mechanistically informative even when it saves no computation.
+
+A particularly useful external probe is headwise query-dependent gated attention~\cite{qiu2025gatedattention}. There the gate is applied to each head's scaled-dot-product-attention output before the output projection. The architecture exposes computational selection directly, but does not by itself establish what the gate selects. That requires relating gate values and interventions to architecture-independent state-transition metrics.
+
+\section{Residual dynamics}
+For a block update $\Delta_l$, we distinguish three mechanistic possibilities.
+
+\paragraph{Refinement.}
+The update improves or sharpens the current trajectory. Candidate evidence includes improved logit margin, stronger decodability of task-relevant variables, positive causal block utility, and stable continuation of a useful direction.
+
+\paragraph{Complementarity.}
+The update adds useful information without destroying previous useful information. Candidate evidence includes new decodable factors, increased useful subspace coverage, and positive utility for both earlier and later transformations.
+
+\paragraph{Interference.}
+The update damages a useful trajectory or creates a state that later computation must repair. Geometry alone is insufficient. Strong evidence requires:
+\begin{enumerate}[leftmargin=*]
+\item statistically reliable negative task-conditioned block utility;
+\item later repair, reversal, or compensation;
+\item replication across examples and seeds.
+\end{enumerate}
+
+For task family $\tau$, define:
+\[
+U_l(\tau)=Q_\tau(\mathrm{full})-Q_\tau(\mathrm{skip}\ l).
+\]
+Positive $U_l$ indicates useful computation, near-zero $U_l$ indicates redundancy under that condition, and negative $U_l$ marks a candidate harmful transformation.
+
+The sign of $U_l$ depends on the quality functional $Q$, task distribution, and ablation semantics. Skipping a block may create off-distribution states, so norm-matched replacement, activation patching, graded attenuation, and matched-model controls are needed where feasible. We reserve \emph{strong interference} for the conjunction above, not for every negative ablation.
+
+\section{Perception-side and action/control-side selection}
+The two selection problems have a cautious structural analogy with embodied cognition. Memory selection resembles the perceptual side: many possible informational influences are available, but only some are selected into the current computation. Computational selection resembles the action/control side: many possible transformations are available, but only some are realized as effective changes.
+
+This is not an identity claim. Attention is not perception, and gating is not action. The claim is that artificial architectures expose measurable forms of selective coupling and conditional state transformation that may be comparable across neural, artificial, and embodied systems.
+
+\section{Metric ontology}
+The common metric layer should be reusable across the paper series. It includes:
+\begin{itemize}[leftmargin=*]
+\item memory activation and retrieval metrics;
+\item attention concentration and dilution;
+\item residual update geometry;
+\item causal block utility;
+\item refinement, complementarity, and interference evidence;
+\item temporal and multiscale stability;
+\item head/layer organization;
+\item gate and modulation statistics;
+\item standard task and systems metrics.
+\end{itemize}
+
+Metric names must preserve interpretation discipline. For example, negative cosine between state and update is anti-alignment, not proof of interference.
+
+\begin{center}
+\centering
+\small
+\begin{tabular}{p{.19\linewidth}p{.27\linewidth}p{.43\linewidth}}
+\toprule
+Question & Primary observable & Required escalation \\
+\midrule
+What information is selected? & entropy, top-$k$/evidence mass, retrieval recall & perturb or remove selected sources and measure task/state effects \\
+What computation is admitted? & $g_{l,h,t}$, candidate/effective update pair & force/open/close/shuffle gates or ablate the candidate update \\
+Is an update useful? & $U_l(\tau)$, target log-probability, margin & paired examples, controls for ablation artifacts, seed replication \\
+Is there interference? & negative utility plus trajectory divergence & later repair/reversal and replication \\
+Is compute saved? & active decisions and theoretical FLOPs & measured latency, memory, and throughput on specified hardware \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\textbf{Evidence ladder.} Descriptive metrics are not promoted directly to mechanisms.
+\end{center}
+
+\section{Discriminating predictions}
+The framework is useful only if it excludes outcomes. It makes five program-level predictions:
+\begin{enumerate}[leftmargin=*]
+\item same content under different distributed goals can change causal block utility, not merely output wording;
+\item explicit gates contain information about downstream update consequences beyond update norm and attention concentration;
+\item useful complementary updates can be near-orthogonal, so high gate values need not track positive residual cosine;
+\item if a candidate update is harmful, later states should show repair or compensation more often than matched benign updates;
+\item hard selective computation can move a quality--cost Pareto frontier, but soft suppression alone need not reduce latency.
+\end{enumerate}
+Failure of predictions 1--4 would reduce the framework to a descriptive vocabulary. Failure of prediction 5 would reject the strong sufficient-activation claim while leaving computational selection as a functional phenomenon.
+
+\section{Paper series}
+\paragraph{Paper 1: Selective residual computation.}
+Tiny Transformer experiments test baseline residual roles, same-content/different-goal counterfactuals, and gated residual streams. A preliminary shared-latent diagnostic and a small pretrained gated-attention model test transfer without displacing the E1--E3 core.
+
+\paragraph{Paper 2: Goal-latent computational selection.}
+Conditional on a positive Paper~1 signal, this paper deepens the preliminary $z$ analysis and studies whether a distributed inferred state predicts future block utility:
+\[
+z_t\rightarrow \widehat{U_l(\tau)}.
+\]
+The key test is not task classification but prediction of computational requirements.
+
+\paragraph{Paper 3: Top-down and inter-layer modulation.}
+This paper studies recurrent, iterative, or cross-layer control where higher/later states modulate lower/local transformations.
+
+\paragraph{Paper 4: Sufficient activation and adaptive compute.}
+This paper tests hard skipping and quality-cost Pareto fronts. The strongest hypothesis is that reduced activation can sometimes improve quality:
+\[
+\exists C_1\subset C_2:
+\mathrm{Cost}(C_1)<\mathrm{Cost}(C_2),
+\quad Q(C_1)>Q(C_2).
+\]
+
+\paragraph{Paper 5: Memory selection $\times$ computational selection.}
+This paper combines PRA-style memory activation with computational gating:
+\[
+Q=Q(k_{\mathrm{memory}},k_{\mathrm{compute}}).
+\]
+The aim is to test whether broad recall plus selective state-update admission can reduce distraction.
+
+\section{Relation to natural cognition}
+The program does not claim direct homology between Transformer components and biological mechanisms. It instead proposes shared measurable quantities: memory activation, selective influence, update magnitude, interference, complementarity, temporal persistence, competition, modulation strength, and state stability. These quantities may support careful comparison with selective sensory processing, contextual modulation, recurrent feedback, action selection, gain modulation, and energy-efficient coding.
+
+\section{Falsifiability}
+The program is designed to preserve negative results. If residual blocks rarely show negative causal utility, interference is not a dominant phenomenon. If a goal latent does not predict future block utility better than ordinary residual summaries, the control-state hypothesis is weakened. If gates correlate only with magnitude and not with downstream utility or interference, computational selection must be interpreted narrowly. If memory and computational selection collapse statistically, the dual-selection distinction must be revised.
+
+The unit of replication matters. Repeated tokens from one sequence are not independent seeds, and deterministic inference does not acquire seed-level evidence by rerunning the same checkpoint. Tiny-model claims should replicate across training seeds; pretrained claims should report variation across examples, tasks, prompt conditions, and model variants. Confirmatory thresholds and test splits should be fixed before final inspection.
+
+\section{Boundary conditions}
+The decomposition may be unidentifiable when candidate and effective updates cannot be captured at matched locations, when gates saturate, or when an intervention drives the model far outside its training distribution. Architecture comparisons may also confound selection with parameter count, optimization history, tokenizer, or data. These are not bookkeeping details: they determine which causal contrast is justified. Paper-facing conclusions must therefore name the exact contrast---within-model gate intervention, matched trained architecture, or unmatched pretrained comparison.
+
+\section{Conclusion}
+This paper line studies neural computation as selective influence over state dynamics. Memory selection determines which information participates in computation. Computational selection determines which candidate transformations become effective state changes. Residual streams, attention, gates, latent state, top-down modulation, and adaptive compute are not isolated tricks but experimentally accessible mechanisms for studying how artificial systems regulate their own dynamics. Paper 1 begins with tiny Transformer residuals; the broader aim is an architecture-independent measurement program for cognition-like computation.
+
+\begin{thebibliography}{9}
+\bibitem{vaswani2017attention}
+A. Vaswani et al.
+\newblock Attention Is All You Need.
+\newblock \emph{NeurIPS}, 2017.
+
+\bibitem{kornblith2019cka}
+S. Kornblith, M. Norouzi, H. Lee, and G. Hinton.
+\newblock Similarity of Neural Network Representations Revisited.
+\newblock \emph{ICML}, 2019.
+
+\bibitem{graves2016act}
+A. Graves.
+\newblock Adaptive Computation Time for Recurrent Neural Networks.
+\newblock \emph{arXiv:1603.08983}, 2016.
+
+\bibitem{qiu2025gatedattention}
+Z. Qiu et al.
+\newblock Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free.
+\newblock \emph{arXiv:2505.06708}, 2025.
+\end{thebibliography}
+\end{document}

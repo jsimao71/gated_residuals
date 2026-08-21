@@ -1,82 +1,124 @@
-# Selective Residual Computation — Paper 1
+# Selective Computation and Residual Dynamics
 
-Mechanism-first research project for studying what residual depth actually does in language models.
+Mechanism-first research line for studying selective influence over neural state dynamics.
 
-## Core question
-Do Transformer blocks mainly refine one evolving solution, add complementary computation, or create task-dependent interference that later layers repair? If block utility is task-dependent, can a distributed inferred goal state predict useful transformations and can contextual modulation suppress or skip unnecessary computation?
+Paper 0 defines the dual-selection framework:
 
-## Why this is not just interpretability
-Internal metrics are instruments for testing competing mechanisms and designing architectures. Strong interference evidence requires:
-1. task-conditioned negative causal block utility,
-2. later repair/reversal/compensation,
-3. replication across examples and seeds.
+- **memory selection**: which available information becomes computationally active;
+- **computational selection**: which candidate transformations become effective state updates.
 
-## Metric families
-1. PRA-style memory activation
-2. Attention concentration / dilution
-3. Residual refinement / complementarity / interference
-4. Temporal and multiscale stationarity / stability
-5. Head-vs-layer organization
-6. Standard ML/DL, optimization, and systems metrics
+Paper 1 is the first experimental instantiation. It tests whether Transformer residual blocks
+refine, complement, or interfere with task-conditioned trajectories, and whether explicit gates
+select updates with independently measurable downstream consequences.
 
-The instrumentation is broader than the first paper so it can later support alternative architectures, local-rule systems, and neural comparisons.
+Start with:
 
-## Datasets
-Primary: controlled synthetic NLP counterfactual mixtures with same-content/different-goal pairs, implicit/distributed goals, conflicting local affordances, controlled goal distance, and `goal_identifiability`.
+- `papers/paper0/paper0_selective_computation_position.tex` — position and measurement framework;
+- `papers/paper1/paper1_residual_inhibition.tex` — falsifiable E1–E8 experimental design;
+- `METRICS.md` — canonical terms, quantities, and interpretation limits;
+- `ROADMAP.md` — evidence-conditional paper sequence.
 
-Continuity: WikiText-2, WikiText-103, HotpotQA, QASPER.
+## Evidence discipline
 
-2-D worlds, mazes, Sudoku, and embodied-agent environments are deferred.
+Descriptive geometry is not a mechanism. In particular:
+
+- negative state–update cosine is anti-alignment, not interference;
+- high attention entropy is diffusion, not necessarily distraction;
+- a low gate is suppression, not necessarily beneficial inhibition;
+- soft gating does not save compute when the candidate update was already evaluated.
+
+Strong interference requires all three:
+
+1. statistically reliable negative task-conditioned causal block utility;
+2. later repair, reversal, or compensation;
+3. replication across examples and independently trained seeds.
 
 ## Experimental priority
+
 ### Mandatory core
-- E1 baseline residual map on tiny Transformers
-- E2 counterfactual goal manipulation
-- E3 gated residual stream
+
+- **E1** — baseline residual map on tiny decoder-only Transformers;
+- **E2** — same-content/different-goal counterfactuals;
+- **E3** — matched gated residual stream.
 
 ### Secondary
-- E4 shared distributed goal latent
-- E5 combined goal-conditioned gating
 
-### Conditional / stretch
-- E6 hard skipping and sufficient-activation frontier
-- E7 pretrained / third-party architecture transfer
-- E8 PRA memory × computation interaction
+- **E4** — shared distributed goal latent;
+- **E5** — combined goal-conditioned gating.
 
-Do not expand the architecture matrix before E1–E4 identify a robust phenomenon.
+### Conditional
 
-## Architecture policy
-Tiny Transformers are the discovery environment. Pretrained models initially test only the strongest qualitative transfer effects.
+- **E6** — hard skipping and quality–cost Pareto fronts;
+- **E7** — pretrained gated-attention and evidence-selected architecture transfer;
+- **E8** — PRA memory-selection × computational-selection factorial.
 
-Choose third-party comparators based on results:
-- residual interference -> mHC / Hyper-Connections
-- conditional compute -> Mixture-of-Depths / LayerSkip
-- iterative refinement -> TRM
+Do not expand E6–E8 until E1–E4 identify a robust phenomenon.
 
-## Novel interventions
-Residual gate:
-`h[l+1] = h[l] + g_l(z) * F_l(h[l])`
+## Python package
 
-Shared goal state:
-`z[l+1] = z[l] + G_l(z[l], h[l])`
+The implementation lives in `src/gated_residuals` and keeps model-specific hooks behind adapters.
+Its main modules are:
 
-The key test for `z` is not task classification; it should predict future causal block utility.
+- `records.py` — validated candidate/effective update captures;
+- `residual_dynamics.py` — geometry, causal utility, bootstrap intervals, repair detection;
+- `attention_dilution.py` and `memory_activation.py` — memory-selection measurements;
+- `gate_metrics.py` — gate distributions, autocorrelation, and gate–metric relations;
+- `temporal_stability.py` and `head_layer_similarity.py` — multiscale dynamics;
+- `causal_ablation.py` — block and gate interventions;
+- `artifacts.py` — manifests plus CSV/Parquet outputs;
+- `adapters/qwen3_gated.py` — released Qwen3 headwise-gate probe.
 
-## Evidence-driven paper pivot
+The small `gated_residuals/common` compatibility layer is copied from the model-agnostic
+`pdattention/src/common` utilities so runs do not depend on a sibling checkout. The exact PRA
+recall/materialization metric is reused by `memory_activation.py`.
+
+## One-command smoke test
+
+From the repository root:
+
+```bash
+python -m pytest -q
+```
+
+The analytic tests cover known residual cosines, causal utility, amplification–repair trajectories,
+attention entropy/support, gate interventions, temporal metrics, PRA recall sparsity, artifacts,
+and exact native-forward parity for a Qwen-style gated adapter fixture.
+
+## Released gated-attention comparison
+
+The pinned experiment configuration is `configs/pretrained_gated_attention.yaml`.
+
+- model repository: `QwQZh/gated_attention`;
+- model revision: `aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b`;
+- official implementation: `qiuzh20/gated_attention`;
+- code revision: `f4c2a5f6ffd6ec709e0c60072c95ed4f5ce5b5d2`;
+- primary pair: `1B_baseline` versus `1B_gate_headwise`.
+
+Source inspection confirms the headwise gate has shape `[batch, token, query_head, 1]`, is
+query-dependent and sigmoid-valued, and multiplies the per-head SDPA output before flattening and
+`o_proj`. Candidate and effective updates are recorded separately. Native parity and gate
+interventions are separate execution modes.
+
+## Artifact contract
+
+Every experiment must save:
+
+- config, seed, repository commit, environment, package versions, dtype, and device;
+- model/tokenizer/dataset revisions and context/batch settings;
+- exact hook locations, tensor semantics, and intervention mode;
+- derived JSON/Parquet observations and paper-facing CSV summaries.
+
+Raw observations retain run, model, dataset, task, example, token, layer, and head identifiers.
+Do not retain large raw activations indefinitely unless a result requires them for reproducibility.
+
+## Evidence-driven pivot
+
 After E1–E4:
-- harmful + repaired blocks -> residual interference
-- strong utility prediction from goal state -> distributed task control
-- modulation quality gains -> goal-modulated residual computation
-- quality improves while compute drops -> sufficient/selective activation
-- weak/null effects -> comparative residual dynamics / falsification
 
-The title and proposed mechanisms are provisional. The scientific result decides the paper.
+- harmful and repaired blocks → residual-interference characterization;
+- strong future-utility prediction from goal state → distributed task control;
+- modulation with quality gains → goal-modulated residual computation;
+- quality improves while hard active compute falls → sufficient/selective activation;
+- weak or null effects → comparative residual dynamics and falsification.
 
-## Broader research line
-- PRA: what memory becomes active?
-- residual modulation: what transformations become active now?
-- Neural Modules: what large functional areas are assembled for a task/session?
-- Tree of Experts: how the repertoire differentiates developmentally
-- local learning rules: how structures and dynamics are acquired
-
-Candidate cross-cutting hypothesis: **Principle of Sufficient Activation** — under contextual constraints, unnecessary activation can be both resource-costly and functionally harmful.
+The scientific result determines the eventual Paper 1 title and claim.

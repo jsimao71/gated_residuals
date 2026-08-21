@@ -2,16 +2,17 @@
 \usepackage[margin=.82in]{geometry}
 \usepackage{amsmath,amssymb,booktabs,hyperref,microtype,enumitem,array}
 \usepackage[T1]{fontenc}
-\title{Selective Residual Computation: Refinement, Interference, Goal Modulation, and Sufficient Activation}
+\microtypesetup{expansion=false}
+\title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
 \date{Paper 1 research draft --- revised August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Most deep-learning evaluation measures behavioral competence rather than internal computation. We propose a mechanism-first comparative program in which trained language models are treated as experimental cognitive systems. Paper 1 focuses on residual computation and asks whether depth primarily implements progressive refinement, complementary computation, destructive interference followed by repair, or task-dependent mixtures of these. A common metric framework covers memory activation, attention dilution, residual dynamics, multiscale temporal stability, head/layer organization, and standard ML/DL and systems metrics. The core experiments first characterize unmodified tiny Transformers using causal block utility and counterfactual goal manipulations. Only after the baseline phenomenon is established do we introduce goal-conditioned residual gating and a shared distributed goal latent. The architecture is therefore an experimental intervention rather than a predetermined contribution. We test the stronger sufficient-activation hypothesis that contextually unnecessary computation can be both costly and harmful, so selective inhibition may improve task quality while reducing active computation. The final paper claim is explicitly allowed to move toward whichever mechanistic result is best supported.
+Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. The title and final claim are allowed to pivot toward refinement, conditional computation, or a null characterization if the proposed interference and gating hypotheses fail.
 \end{abstract}
 
 \section{Scientific objective}
-A theory of artificial and natural cognition requires more than loss, accuracy, exact match, or F1. Two systems can achieve similar outputs while using different memory, temporal, representational, and control dynamics. Conversely, similar computational principles may recur in systems with different learning rules or architectures.
+Paper~0 defines the broader dual-selection framework. Paper~1 instantiates it in Transformer residual streams and asks whether residual blocks refine, complement, interfere, or can be modulated or skipped under task context. The scope here is experimental: loss, accuracy, exact match, and F1 remain primary behavioral outcomes, while internal quantities discriminate among mechanisms that could produce similar scores.
 
 We therefore treat trained neural networks as experimental cognitive systems and ask:
 \begin{enumerate}[leftmargin=*]
@@ -21,20 +22,34 @@ We therefore treat trained neural networks as experimental cognitive systems and
 \item When do successive residual updates refine, complement, or interfere with one another?
 \item Can a distributed task/goal state predict which transformations will be useful?
 \item Can task-dependent inhibition become real computation skipping?
-\item Which findings survive changes in architecture, scale, or learning rule?
+\item Which strongest tiny-model findings survive a pretrained gated-attention comparison?
 \end{enumerate}
 
-Backpropagation is initially held fixed as an experimental convenience, not as a biological claim. This lets us investigate architecture, task ecology, memory activation, residual dynamics, goal encoding, and online control before replacing global learning with local learning rules. The longer-term comparison is Transformer+BP versus alternative architectures versus local-rule systems versus biological measurements.
+Backpropagation and token streams are held fixed. Biological analogy, local learning rules, and embodied tasks are outside this paper's evidential scope.
+
+\subsection{Questions and preregistered decision structure}
+The confirmatory sequence is deliberately asymmetric. E1 must establish a residual phenomenon before E3 is interpreted as a remedy, and E2 must establish task dependence before a goal-conditioned explanation is advanced. The primary hypotheses are:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{H1 (task-conditioned utility):} at least some blocks have utility $U_l(\tau)$ that changes across counterfactual goals with content held fixed;
+\item \textbf{H2 (strong interference):} reliably negative utility, when present, co-occurs with later repair or compensation and replicates across seeds;
+\item \textbf{H3 (learned modulation):} matched residual gates reduce activation of blocks independently classified by E1 as harmful or redundant more than random, static-route, or norm-based controls;
+\item \textbf{H4 (dual selection):} in pretrained gated attention, gate values contain information about functional update consequence beyond attention concentration and update magnitude;
+\item \textbf{H5 (complementarity):} useful high-gate updates need not have positive state--update cosine.
+\end{enumerate}
+Thresholds for negligible utility, minimum effect size, bootstrap confidence level, and required seed replication are fixed in the experiment registry before final test inspection. Failure to reject a null is reported with uncertainty rather than converted into evidence for redundancy.
 
 \section{Mechanistic measurement framework}
-Let $h_{l,t}\in\mathbb{R}^d$ be the residual representation at layer $l$ and token position $t$, and define
+Let $x_{l,t}\in\mathbb{R}^d$ be the state entering a candidate transformation at layer $l$ and token position $t$. Define the raw candidate update $\Delta_{l,t}$, computational-selection variable $g_{l,t}$ (or $g_{l,h,t}$), and effective update
 \[
-\Delta_{l,t}=h_{l+1,t}-h_{l,t}.
+\widetilde{\Delta}_{l,t}=g_{l,t}\odot\Delta_{l,t},
+\qquad
+x_{l+1,t}=x_{l,t}+\widetilde{\Delta}_{l,t}.
 \]
+For an ungated block, $g=1$ by convention, but computational selection is claimed only through intervention. Pre-norm state, SDPA output, output-projection result, MLP output, and post-block state are named separately in artifacts and never compared as if they occupied the same location.
 The metric battery is deliberately broad, but each family must discriminate among mechanistic hypotheses rather than become an interpretability dashboard.
 
 \subsection{Memory activation}
-Reuse PRA-style measurements wherever the architecture exposes retrievable or materialized memory: active/available KV ratio, retrieved references/chunks/gists, supporting-fact recall, routing precision/recall/rank, evidence coverage, materialization breadth, and task quality versus active-memory budget.
+Reuse PRA-style measurements wherever the architecture exposes retrievable or materialized memory: active-to-available KV ratio; retrieved references, chunks, or gists; supporting-fact recall; routing precision/recall/rank; evidence coverage; materialization breadth; and task quality versus active-memory budget.
 
 A central cross-line hypothesis is that memory utility need not be monotonic:
 \[
@@ -48,6 +63,8 @@ Measure attention entropy, effective support
 N_{\rm eff}=\exp\!\left(-\sum_i\alpha_i\log\alpha_i\right),
 \]
 top-$k$ mass, evidence mass, distance profile, concentration indices, head similarity, and changes with prompt, context, or memory size. Attention describes interaction structure; it is not treated as a complete causal explanation.
+
+Memory selection and computational selection are crossed into four empirical regimes: sharp-attention/low-gate, sharp-attention/high-gate, diffuse-attention/low-gate, and diffuse-attention/high-gate. Their frequencies and task consequences are reported by layer and head. H4 requires gate information not explained by attention statistics alone.
 
 \subsection{Residual refinement, complementarity, and interference}
 Use update norms and cosines, covariance, CKA/RSA, subspace angles, task-variable decodability, logit trajectories, and causal ablation.
@@ -70,6 +87,8 @@ Strong evidence for interference requires three conditions:
 \end{enumerate}
 Geometry alone is never sufficient to label a transformation harmful.
 
+Because block skipping can create off-manifold states, the confirmatory analysis includes graded attenuation and, where shape and scale permit, norm-matched replacement or counterfactual activation patching. Conclusions state the intervention used. Negative $U_l$ from a single skip is an \emph{interference candidate}, not strong interference.
+
 \subsection{Temporal and multiscale stability}
 Token position provides a temporal axis distinct from model depth. We characterize input embeddings, hidden states, heads, features, and learned subspaces over multiple windows $W$.
 
@@ -89,6 +108,8 @@ Add variance decomposition by layer/head/task, clustering, specialization, redun
 \subsection{Conventional ML/DL and systems metrics}
 Retain loss/perplexity, accuracy, EM, precision, recall, F1, calibration, output entropy, logit margin, gradient norms and directions, weight norms, activation norms, update-to-weight ratios, training stability, FLOPs, realized latency, memory use, throughput, and active-block fraction. Internal metrics are scientifically useful only when connected to competence, robustness, or resource cost.
 
+Soft gating is not counted as computation saving when the candidate transformation has already been evaluated. Active-FLOP and latency claims are restricted to hard routes that avoid execution; theoretical FLOPs and realized wall-clock speed are reported separately.
+
 \section{Datasets and task ecology}
 Dataset structure is part of the causal experiment. Paper 1 remains in NLP/token streams. Mazes, Sudoku, 2-D environments, and embodied agent tasks are deferred to a separate paper.
 
@@ -107,7 +128,7 @@ Define a controllable \emph{goal identifiability} variable measuring how strongl
 Use WikiText-2, WikiText-103, HotpotQA, and QASPER where feasible. WikiText supports unconstrained token dynamics and temporal stability analysis; HotpotQA provides supporting-fact supervision for memory/evidence activation; QASPER provides long scientific-document QA. Reuse creates direct continuity with PRA routing, attention dilution, materialization, and long-context measurements.
 
 \section{Architectures and experimental priority}
-All architectures should expose a common instrumentation interface for embeddings, residual pre/post states, attention outputs/weights, MLP outputs, per-head outputs where feasible, logits, gradients, and architecture-specific latent states.
+All architectures expose a common instrumentation record for embeddings, residual pre/post states, attention outputs/weights, MLP outputs, per-head outputs where feasible, logits, gradients, candidate/effective updates, and architecture-specific latent states. Model-specific hooks live behind an adapter. Native instrumented forwards must match untouched logits exactly when possible, or within a declared tolerance, before measurements are accepted.
 
 \subsection{Core discovery models}
 The mandatory first-cycle matrix is:
@@ -120,7 +141,17 @@ The mandatory first-cycle matrix is:
 Tiny models are the mechanism-discovery environment because they permit exhaustive block ablation, many seeds, dense metric capture, and controlled architectural intervention.
 
 \subsection{Selective pretrained transfer}
-Begin with a small open pretrained family already supported by the PRA/Qwen infrastructure. Do not initially repeat the full tiny-model experiment matrix. Transfer only the strongest qualitative findings from the tiny-model phase.
+The external comparison uses the released 1B baseline and headwise variants (model revision \texttt{aad415c45ec6}). Their full identifiers and revisions are pinned in the run config. The released configurations match on 28 layers, hidden width 2048, 16 query heads, 8 key/value heads, vocabulary size 152064, maximum position setting 32768, tokenizer family, and bfloat16 dtype. The headwise model adds one gate logit per query head to each attention query projection, so capacity is close but not parameter-identical. Shared release provenance does not prove identical data order or optimization history; comparisons are therefore described as closely matched pretrained contrasts, not a single-factor randomized experiment.
+
+\paragraph{Verified gate location.}
+Inspection of official implementation revision \texttt{f4c2a5f6ffd6} shows that the query projection packs query features and gate logits. For headwise gating the logits are reshaped to
+\[
+g_{l}\in[0,1]^{B\times T\times H\times 1}
+\]
+after a sigmoid. They multiply the per-head SDPA output after the head axis is moved to $[B,T,H,d_h]$ and before flattening and the output projection. Thus we distinguish the per-head ungated SDPA candidate $a_{l,h,t}$, its effective form $g_{l,h,t}a_{l,h,t}$, the post-projection attention write, and the residual state after addition. This sequence follows the release and the gated-attention study~\cite{qiu2025gatedattention}.
+
+\paragraph{Pretrained gate interventions.}
+Native gates are compared with forced-open, forced-closed, per-head mean, token-shuffled, and optional thresholded gates. Shuffling preserves marginal gate distributions. Native instrumentation is parity-tested separately from interventions. Candidate reconstruction from an effective output is rejected when a gate is too small for stable division; no clipped reconstruction is silently analyzed.
 
 \subsection{Conditional comparators}
 TRM, mHC, Mixture-of-Depths, LayerSkip, or other third-party architectures are conditional rather than mandatory for the first cycle. Choose based on the observed phenomenon: mHC if residual interference dominates; MoD/LayerSkip if conditional compute dominates; TRM if iterative refinement dominates.
@@ -175,6 +206,16 @@ and sweep $\lambda$. The strong hypothesis is not merely quality preservation un
 \]
 This is the computation-side analogue of selective memory materialization.
 
+\section{Analysis and statistical design}
+The unit of analysis is declared for every result. Tiny-model claims use at least five independently trained seeds unless a resource exception is recorded. Example-level effects are paired within seed; seed summaries, rather than tokens treated as independent replicates, establish replication. Pretrained deterministic inference varies examples, task family, context condition, and prompt form. Closely matched but separately trained checkpoints are not analyzed as paired parameter realizations.
+
+Primary estimates include sample count, mean, median where skewed, standard deviation, example-bootstrap confidence intervals, seed-level sign consistency, and effect size. Gate--metric relations include Pearson and Spearman correlations, binned curves, layer/head-stratified estimates, and pooled models with layer/head/task controls. A pooled correlation alone cannot support H4. Final test families are held out from architecture and threshold selection.
+
+The minimum pretrained plot set is: gate distributions by layer and head; gate versus alignment, relative magnitude, downstream utility, and attention entropy; candidate versus effective-update geometry; intervention effects; and layerwise baseline-versus-gated dynamics. Plots preserve layer/head/token structure before aggregation.
+
+\subsection{Reproducibility and artifact contract}
+Every run stores config, seed, repository commit, environment, package versions, device/dtype, model and dataset revisions, tokenizer, context length, batch size, exact hook locations, gate semantics, and intervention mode. Derived observations retain run/model/dataset/task/example/token/layer/head identifiers and candidate/effective norms, cosines, attention statistics, quality, utility, and repair score. Large tables use Parquet; paper summaries use CSV. Raw activations are retained only when required to reproduce a derived result.
+
 \section{Staged experimental protocol}
 \subsection{Core E1: baseline residual map}
 Train tiny baseline models across seeds; capture the common metric battery; exhaustively skip individual blocks and selected groups; compute $U_l(\tau)$; identify useful, redundant, and candidate harmful blocks; search for later repair; and measure task decodability, logit trajectories, attention dilution, head/layer similarity, and temporal stability. E1 establishes whether there is an architectural pathology worth fixing.
@@ -199,7 +240,7 @@ Combine $z$ and gates. Test whether gates suppress blocks independently identifi
 Only after soft-gating structure is understood, convert strong inhibition into real execution skipping. Sweep $\epsilon$ and $\lambda$. Report Pareto fronts over quality, active FLOPs, realized latency, and measured interference.
 
 \subsection{Conditional E7: architecture transfer}
-Transfer the strongest mechanistic signatures to a small pretrained Transformer and to whichever alternative architecture best matches the dominant finding.
+First, run the released Qwen3-style baseline/headwise-gated pair on language modeling, retrieval or QA, multi-hop reasoning where supported, and the controlled counterfactual set. Test H4--H5 using native gates and gate interventions. Report conventional task metrics and the dual-selection regimes alongside internal measurements. Only then transfer the strongest tiny-model signature to whichever additional architecture matches the dominant finding.
 
 \subsection{Conditional E8: PRA memory--computation interaction}
 Where PRA is available, factorially vary memory materialization and active computation:
@@ -215,7 +256,7 @@ The paper starts with three nested claims.
 
 \paragraph{Secondary control claim.} Distributed task/goal state predicts some variation in downstream block utility.
 
-\paragraph{Stretch architectural claim.} Goal-conditioned modulation exploits that structure to reduce interference and/or active computation, potentially improving both quality and cost.
+\paragraph{Stretch architectural claim.} Goal-conditioned modulation exploits that structure to reduce interference or active computation and can improve quality or cost.
 
 After E1--E4, choose the paper center by explicit decision rule:
 \begin{itemize}[leftmargin=*]
@@ -226,20 +267,40 @@ After E1--E4, choose the paper center by explicit decision rule:
 \item weak/null effects $\Rightarrow$ comparative residual dynamics/falsification, with unsupported architecture claims removed.
 \end{itemize}
 
-Negative results are part of the design. If harmful blocks are rare, the interference hypothesis is weakened. If $z$ does not beat ordinary residual summaries for predicting utility, the shared-control-state hypothesis is weakened. If gating only saves compute without changing interference, position it as conditional computation rather than cognitive control.
+Negative results are part of the design. If harmful blocks are rare, the interference hypothesis is weakened. If $z$ does not beat ordinary residual summaries for predicting utility, the shared-control-state hypothesis is weakened. If gating only tracks update magnitude, it is interpreted as amplitude control. If attention statistics explain gates almost completely, the dual-selection claim is weakened. If forced-open gates barely change performance, native gate values are not described as causally selecting useful computation. If gating saves compute without changing interference, it is positioned as conditional computation rather than cognitive control.
 
-\section{Theory-building scope}
-The broader program separates resources and timescales. PRA asks which memory becomes active. Selective residual computation asks which transformations become active moment-by-moment, token-by-token, sequence-by-sequence, or task-by-task. Neural Modules concern dynamic assembly of large functional areas at coarser task/session scales. Tree-of-Experts concerns developmental differentiation of the repertoire. Local learning rules ask how those repertoires and control structures are acquired.
+\section{Positioning and scope limits}
+This is a mechanism study, not a claim that Transformer gates instantiate biological inhibition. Representation similarity such as CKA~\cite{kornblith2019cka}, adaptive computation~\cite{graves2016act}, dynamic depth such as Mixture-of-Depths~\cite{raposo2024mod}, and LayerSkip~\cite{elbayad2024layerskip} provide neighboring tools or comparators. The gated-attention release studies the performance, sparsity, stability, attention-sink, and long-context effects of post-SDPA gates~\cite{qiu2025gatedattention}; the present contribution is to use its learned gate as an observable and intervenable variable in an architecture-independent residual-dynamics test. We do not attribute our cognitive interpretation to that work.
 
-These mechanisms may instantiate a common candidate \emph{Principle of Sufficient Activation}: under contextual constraints, an adaptive system should activate only the memory, computation, or functional resources sufficient for the current task. Biological energy constraints motivate this principle, but Paper 1 treats it as a falsifiable computational hypothesis rather than a biological conclusion.
-
-\section{Positioning and follow-on work}
-This is not primarily an interpretability paper. Metrics are instruments for mechanism discovery and architecture design. The broad instrumentation layer is intended to survive even if the paper itself narrows.
-
-Related work should cover residual-stream circuits and representation similarity (CKA/RSA/SVCCA); causal ablation and superposition/interference; adaptive computation and dynamic sparsity (ACT, Mixture-of-Depths, LayerSkip/early exit); alternative residual or recursive architectures (mHC/Hyper-Connections, TRM/HRM); MoE routing; and neuroscience on contextual modulation, inhibition, temporal stability, and energy-efficient coding.
-
-Follow-on papers can deepen temporal/stationarity analysis, move to 2-D/algorithmic/agent environments, replicate findings under local learning rules, study joint PRA memory--computation activation, and compare selected metrics with neural data.
+The present design cannot fully remove training-history confounds in pretrained comparisons, and block ablations may create off-distribution states. It addresses these limits through within-model interventions, closely matched release variants, graded controls, explicit tensor locations, and conservative causal language. Paper-series theory, embodied extensions, local learning, and detailed goal-latent architectures remain in Paper~0 and the roadmap.
 
 \section{Conclusion}
-Paper 1 operationalizes a mechanism-first comparative science of internal computation. It asks what Transformer residual depth actually does, whether task context changes the causal utility of transformations, whether distributed goal state can predict those requirements, and whether selective inhibition can become useful conditional computation. The architecture is subordinate to the scientific result: the paper should ultimately be about the strongest mechanistic regularity discovered.
+Paper~1 asks a bounded causal question: what does Transformer residual depth do under counterfactual task context, and do learned gates select updates with independently measurable consequences? The answer requires candidate/effective update pairs, causal block utility, later repair, matched controls, and replication. Gating is evidence only to the extent that interventions and downstream effects support it. The architecture remains subordinate to the result: refinement, complementarity, conditional computation, interference, and null outcomes are all admissible conclusions.
+
+\begin{thebibliography}{9}
+\bibitem{kornblith2019cka}
+S. Kornblith, M. Norouzi, H. Lee, and G. Hinton.
+\newblock Similarity of Neural Network Representations Revisited.
+\newblock \emph{ICML}, 2019.
+
+\bibitem{graves2016act}
+A. Graves.
+\newblock Adaptive Computation Time for Recurrent Neural Networks.
+\newblock \emph{arXiv:1603.08983}, 2016.
+
+\bibitem{raposo2024mod}
+D. Raposo et al.
+\newblock Mixture-of-Depths: Dynamically Allocating Compute in Transformer-Based Language Models.
+\newblock \emph{arXiv:2404.02258}, 2024.
+
+\bibitem{elbayad2024layerskip}
+M. Elbayad et al.
+\newblock LayerSkip: Enabling Early Exit Inference and Self-Speculative Decoding.
+\newblock \emph{arXiv:2404.16710}, 2024.
+
+\bibitem{qiu2025gatedattention}
+Z. Qiu et al.
+\newblock Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free.
+\newblock \emph{arXiv:2505.06708}, 2025.
+\end{thebibliography}
 \end{document}

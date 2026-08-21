@@ -1,0 +1,108 @@
+import math
+
+import pytest
+import torch
+
+from gated_residuals.attention_dilution import attention_metrics, dual_selection_regimes
+from gated_residuals.causal_ablation import GateIntervention, intervene_gate
+from gated_residuals.gate_metrics import gate_metric_correlations, gate_summary, token_autocorrelation
+from gated_residuals.head_layer_similarity import head_layer_organization
+from gated_residuals.residual_dynamics import (
+    amplification_repair,
+    causal_block_utility,
+    update_geometry,
+)
+from gated_residuals.temporal_stability import (
+    autocorrelation,
+    covariance_drift,
+    linear_cka,
+    principal_subspace_drift,
+    representational_similarity,
+    rolling_moments,
+)
+
+
+def test_residual_geometry_and_utility_are_analytic():
+    state = torch.tensor([[[3.0, 4.0], [1.0, 0.0]]])
+    update = torch.tensor([[[0.0, 5.0], [-1.0, 0.0]]])
+    metrics = update_geometry(state, update)
+    assert torch.allclose(metrics["residual_norm"], torch.tensor([[5.0, 1.0]]))
+    assert torch.allclose(metrics["update_norm"], torch.tensor([[5.0, 1.0]]))
+    assert torch.allclose(metrics["state_update_cosine"], torch.tensor([[0.8, -1.0]]))
+    assert torch.allclose(
+        causal_block_utility(torch.tensor([0.8, 0.4]), torch.tensor([0.7, 0.6])),
+        torch.tensor([0.1, -0.2]),
+    )
+
+
+def test_amplification_repair_requires_growth_then_recovery():
+    event = amplification_repair(torch.tensor([1.0, 2.0, 4.0, 1.5]))
+    assert event["detected"] is True
+    assert event["peak_layer"] == 2
+    assert event["repair_score"] == pytest.approx(0.625)
+    assert amplification_repair(torch.tensor([1.0, 1.1, 1.2]))["detected"] is False
+
+
+def test_attention_metrics_for_uniform_and_one_hot_rows():
+    attention = torch.tensor([[[[0.25, 0.25, 0.25, 0.25], [1.0, 0.0, 0.0, 0.0]]]])
+    metrics = attention_metrics(attention, topk=2)
+    assert metrics["attention_entropy"][0, 0, 0] == pytest.approx(math.log(4))
+    assert metrics["attention_effective_support"][0, 0, 0] == pytest.approx(4.0)
+    assert metrics["attention_topk_mass"][0, 0, 0] == pytest.approx(0.5)
+    assert metrics["attention_entropy"][0, 0, 1] == pytest.approx(0.0)
+    assert metrics["attention_sink_mass"][0, 0, 1] == pytest.approx(1.0)
+
+
+def test_dual_selection_regimes_cover_all_observations():
+    regimes = dual_selection_regimes(
+        torch.tensor([0.1, 0.1, 1.0, 1.0]),
+        torch.tensor([0.1, 0.9, 0.1, 0.9]),
+        entropy_threshold=0.5,
+    )
+    assert all(value == pytest.approx(0.25) for value in regimes.values())
+    assert sum(float(value) for value in regimes.values()) == pytest.approx(1.0)
+
+
+def test_gate_metrics_and_interventions_preserve_dimensions():
+    gate = torch.tensor([[[[0.1], [0.9]], [[0.2], [0.8]], [[0.3], [0.7]]]])
+    summary = gate_summary(gate)
+    assert summary["gate_mean"] == pytest.approx(0.5)
+    assert summary["gate_fraction_below_0.5"] == pytest.approx(0.5)
+    assert token_autocorrelation(gate, lag=1).shape == (1, 2, 1)
+    for mode in GateIntervention:
+        changed = intervene_gate(gate, mode, generator=torch.Generator().manual_seed(4))
+        assert changed.shape == gate.shape
+    assert torch.all(intervene_gate(gate, GateIntervention.FORCED_OPEN) == 1)
+    assert torch.all(intervene_gate(gate, GateIntervention.FORCED_CLOSED) == 0)
+
+
+def test_gate_correlations_identify_monotonic_relation():
+    gate = torch.tensor([0.1, 0.2, 0.3, 0.4])
+    correlations = gate_metric_correlations(gate, {"utility": gate * 2})
+    assert correlations["pooled_pearson_gate_utility"] == pytest.approx(1.0)
+    assert correlations["pooled_spearman_gate_utility"] == pytest.approx(1.0)
+
+
+def test_temporal_statistics_known_cases():
+    series = torch.arange(10, dtype=torch.float32).view(1, 5, 2)
+    moments = rolling_moments(series, 3)
+    assert moments["mean"].shape == (1, 3, 2)
+    assert torch.allclose(moments["mean"][0, :, 0], torch.tensor([2.0, 4.0, 6.0]))
+    acf = autocorrelation(series, 2)
+    assert torch.allclose(acf[..., 0], torch.ones_like(acf[..., 0]))
+    matrix = torch.tensor([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0], [0.0, -1.0]])
+    assert linear_cka(matrix, matrix) == pytest.approx(1.0)
+    assert representational_similarity(matrix, matrix) == pytest.approx(1.0)
+    assert covariance_drift(matrix, matrix) == pytest.approx(0.0)
+    assert principal_subspace_drift(matrix, matrix, rank=2) == pytest.approx(0.0, abs=1e-4)
+
+
+def test_head_layer_organization_returns_finite_contrast():
+    representations = torch.randn(3, 4, 5, 2, generator=torch.Generator().manual_seed(3))
+    result = head_layer_organization(representations)
+    assert set(result) == {
+        "within_layer_head_similarity",
+        "across_layer_corresponding_head_similarity",
+        "within_minus_across_similarity",
+    }
+    assert all(torch.isfinite(value) for value in result.values())

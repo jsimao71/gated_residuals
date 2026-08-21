@@ -206,6 +206,11 @@ tempCodeRunnerFile.py
 # Ruff stuff:
 .ruff_cache/
 
+# Local LaTeX/PDF visual-QA intermediates
+docs/papers/**/*.aux
+docs/papers/**/*.out
+tmp/
+
 # PyPI configuration file
 .pypirc
 

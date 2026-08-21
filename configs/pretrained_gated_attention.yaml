@@ -1,0 +1,40 @@
+experiment_name: qwen3-gated-attention-probe
+seed: 0
+device: auto
+dtype: bfloat16
+batch_size: 1
+max_seq_len: 2048
+
+models:
+  baseline:
+    repository: QwQZh/gated_attention
+    subfolder: 1B_baseline
+    revision: aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b
+    headwise_attn_output_gate: false
+  gated:
+    repository: QwQZh/gated_attention
+    subfolder: 1B_gate_headwise
+    revision: aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b
+    headwise_attn_output_gate: true
+
+implementation:
+  repository: qiuzh20/gated_attention
+  revision: f4c2a5f6ffd6ec709e0c60072c95ed4f5ce5b5d2
+  gate_source: packed q_proj output
+  gate_shape: batch x token x query_head x 1
+  gate_nonlinearity: sigmoid
+  gate_location: post-SDPA, pre-o_proj
+  residual_write_location: post-o_proj
+
+interventions:
+  - native
+  - forced_open
+  - forced_closed
+  - mean
+  - shuffled_token
+  - thresholded
+
+artifacts:
+  raw_format: parquet
+  summary_format: csv
+  save_raw_activations: false
