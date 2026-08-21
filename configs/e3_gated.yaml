@@ -1,0 +1,13 @@
+stage: E3
+description: Matched-capacity ungated versus scalar residual-gated tiny decoders.
+base_config: configs/e1_baseline.yaml
+variants: [matched_baseline, gated]
+controls: [native, forced_open, shuffled, random_skip, static_task, candidate_norm, residual_norm]
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  minimum_accuracy_effect: 0.01
+  final_test_frozen: true
+timing:
+  warmup_batches: 3
+  measured_batches: 20

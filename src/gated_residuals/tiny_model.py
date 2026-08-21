@@ -119,6 +119,7 @@ class TinyResidualDecoder(nn.Module):
         *,
         skip_layers: set[int] | None = None,
         gate_mode: str = "native",
+        gate_overrides: list[torch.Tensor] | None = None,
         hard_threshold: float | None = None,
         capture: bool = False,
     ) -> TinyOutput:
@@ -151,6 +152,14 @@ class TinyResidualDecoder(nn.Module):
                 gate = torch.zeros_like(gate)
             elif gate_mode != "native":
                 raise ValueError(f"unsupported gate mode: {gate_mode}")
+            if gate_overrides is not None:
+                override = gate_overrides[layer_index].to(device=gate.device, dtype=gate.dtype)
+                if override.shape != gate.shape:
+                    raise ValueError(
+                        f"gate override {layer_index} has shape {tuple(override.shape)}; "
+                        f"expected {tuple(gate.shape)}"
+                    )
+                gate = override
             if layer_index in skip_layers:
                 gate = torch.zeros_like(gate)
             active = torch.ones_like(gate, dtype=torch.bool)

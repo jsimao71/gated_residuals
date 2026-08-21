@@ -1,0 +1,73 @@
+{
+  "argv": [
+    "scripts\\run_e3.py"
+  ],
+  "config": {
+    "data": {
+      "distractor_probability": 0.5,
+      "generation_seed": 1729,
+      "max_length": 56,
+      "test_families": 90,
+      "train_families": 240,
+      "val_families": 60
+    },
+    "description": "Preregistered baseline residual map on deterministic counterfactual language families.",
+    "model": {
+      "dropout": 0.0,
+      "goal_width": 24,
+      "heads": 4,
+      "layers": 4,
+      "max_length": 56,
+      "mlp_ratio": 2,
+      "width": 64
+    },
+    "stage": "E1",
+    "statistics": {
+      "bootstrap_samples": 2000,
+      "confidence": 0.95,
+      "final_test_frozen": true,
+      "minimum_seed_fraction": 0.8,
+      "negligible_utility": 0.002,
+      "repair_fraction": 0.25
+    },
+    "training": {
+      "batch_size": 64,
+      "device": "auto",
+      "epochs": 18,
+      "learning_rate": 0.001,
+      "max_grad_norm": 1.0,
+      "seeds": [
+        11,
+        22,
+        33,
+        44,
+        55
+      ],
+      "weight_decay": 0.0001
+    }
+  },
+  "metadata": {
+    "batch_size": 64,
+    "commit_hash": "753480101f0476e558ec82282e1926491b1f64ba",
+    "context_length": 56,
+    "dataset": "synthetic_counterfactual_v1",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "float32",
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {},
+    "intervention": "native",
+    "model": "tiny_residual_decoder",
+    "model_revision": null,
+    "model_variant": "gated",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "gated-seed-44",
+    "seed": 44,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

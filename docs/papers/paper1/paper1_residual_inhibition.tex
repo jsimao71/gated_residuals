@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- E1--E2 results, August 2026}
+\date{Paper 1 research draft --- E1--E3 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1 did not meet the strong-interference criterion. E2 found replicated utility contrasts only when a learned task was compared with an unlearned sum task; the learned-only counterfactual contrast did not replicate.
+Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1 did not meet the strong-interference criterion; E2's learned-only goal contrast did not replicate; and E3's scalar gates saturated near open without improving quality.
 \end{abstract}
 
 \section{Scientific objective}
@@ -281,6 +281,30 @@ Eight of twelve pair--layer contrasts met this rule: all four maximum--sum and a
 Residual states nevertheless differed substantially between same-content prompts: mean final-token $\lVert\Delta h_l\rVert$ increased from roughly 11 at the first block to 19--23 at the fourth, while paired-state cosines remained between 0.17 and 0.52. These descriptive differences cannot be assigned uniquely to inferred goal because the natural-language instructions themselves differ. The association between the nominal goal-identifiability score and block utility was negligible (Pearson $r=0.012$; Spearman $\rho=0.032$). The small Spearman $p$-value produced by treating repeated layer/seed observations independently is not used as evidence. Records and manifests are stored under \texttt{results/e2}.
 
 E2 therefore narrows the surviving interpretation: the models represent counterfactual prompts differently, but this cycle does not show replicated goal-conditioned utility among tasks of comparable competence. E3 remains warranted as a mandatory architectural comparison, but not as a demonstrated remedy for strong interference.
+
+\subsection{E3: matched scalar residual gates}
+We trained five matched-capacity ungated controls and five scalar-gated decoders using the E1 data, architecture, training schedule, and seeds. Both variants contain exactly 151,018 parameters: the ungated control registers an unused parameter vector matching each gate's weight and bias. This isolates parameter count but does not equate optimization geometry, so the primary estimate remains the paired seed-level quality difference.
+
+Native gated accuracy was $0.613$ versus $0.612$ for the matched ungated model. The paired difference was $0.0007$ with a 95\% seed-bootstrap interval $[-0.0074,0.0089]$. Thus E3 provides neither a meaningful quality improvement nor degradation. Distractor-present accuracy was not worse than distractor-absent accuracy ($0.628$ versus $0.599$), but this non-random prompt grouping cannot establish robustness.
+
+\begin{table}[ht]
+\centering
+\caption{E3 test accuracy averaged across five seeds. All soft controls evaluate every block.}
+\begin{tabular}{lr@{\qquad}lr}
+\toprule
+Condition & Accuracy & Condition & Accuracy \\
+\midrule
+Matched ungated & .612 & Native gate & .613 \\
+Forced open & .612 & Token shuffled & .611 \\
+Task-static mean & .613 & Random binary & .604 \\
+Candidate-norm rank & .612 & Residual-norm rank & .613 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The gates did not learn selective inhibition. Their mean was $0.977$, median $0.981$, and Bernoulli entropy $0.103$ nats; only $1.69\%$ fell below $0.9$ and none fell below $0.75$. Native-minus-forced-open accuracy was $0.0007$ with interval $[-0.0022,0.0044]$. The cell provisionally marked candidate harmful in E1 (final sum block) received a higher mean gate than all other cells ($0.995$ versus $0.975$), contrary to H3. Gate--utility and gate--relative-magnitude Spearman correlations were $-0.068$ and $0.076$. Their token-level $p$-values are not treated as inferential evidence because observations share examples, layers, and seeds; the effect sizes are small in either case.
+
+Native gated, forced-open, and matched-ungated forwards took approximately $0.203$, $0.194$, and $0.198$ milliseconds per example on the same GPU timing loop. These small differences are timing noise rather than conditional execution: every candidate block was evaluated, active-block fraction was 1, and soft gating saved no FLOPs. Shuffled, task-static, and norm-ranked controls reproduced native accuracy to within two tenths of a percentage point; random binary gates were slightly worse. The mechanistically relevant conclusion is therefore negative: this scalar-gated training run is nearly an ungated network, does not suppress the E1 negative cell, and does not support H3. Artifacts are stored under \texttt{results/e3}.
 
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.

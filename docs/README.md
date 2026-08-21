@@ -92,11 +92,14 @@ config, run manifests, seed summaries, and derived records beneath `results/`.
 ```bash
 PYTHONPATH=src python scripts/run_e1.py
 PYTHONPATH=src python scripts/run_e2.py
+PYTHONPATH=src python scripts/run_e3.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
 `--reuse-checkpoints` to regenerate E1 analyses without retraining.
 E2 reuses those checkpoints and performs only paired counterfactual analysis.
+E3 trains the five-seed matched-capacity ungated/gated matrix; pass `--reuse-checkpoints` to
+regenerate its control analyses.
 
 ## Released gated-attention comparison
 

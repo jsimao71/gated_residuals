@@ -1,0 +1,35 @@
+{
+  "stage": "E3",
+  "seeds": 5,
+  "parameter_counts": {
+    "matched_baseline": 151018,
+    "gated": 151018
+  },
+  "matched_parameter_count": true,
+  "gated_minus_baseline_accuracy": {
+    "mean": 0.0007407407974824309,
+    "seed_ci_low": -0.007407407276332378,
+    "seed_ci_high": 0.008888889104127884
+  },
+  "native_minus_forced_open_accuracy": {
+    "mean": 0.00074074073927477,
+    "seed_ci_low": -0.0022222220432013273,
+    "seed_ci_high": 0.004444444086402655
+  },
+  "mean_gate": 0.9768093912469016,
+  "mean_gate_entropy": 0.10308518341138581,
+  "median_gate": 0.9809409081935883,
+  "fraction_gate_below_0_9": 0.01685185185185185,
+  "mean_gate_e1_candidate_harmful_cell": 0.9947773803604973,
+  "mean_gate_other_cells": 0.9751759376911202,
+  "gate_utility_spearman": {
+    "rho": -0.0678662286556892,
+    "p": 5.984087859490114e-07
+  },
+  "gate_relative_magnitude_spearman": {
+    "rho": 0.07620540860290967,
+    "p": 2.0611519769037907e-08
+  },
+  "soft_active_block_fraction": 1.0,
+  "soft_gating_saves_flops": false
+}

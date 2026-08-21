@@ -46,3 +46,14 @@ def test_forced_open_is_exact_baseline_for_gated_model_at_initialization():
     first = model(ids, mask, gate_mode="open").logits
     second = model(ids, mask, gate_mode="open", capture=True).logits
     torch.testing.assert_close(first, second, rtol=0, atol=0)
+
+
+def test_gate_override_can_close_one_layer_without_changing_other_shapes():
+    model = TinyResidualDecoder(32, width=16, layers=2, heads=4, max_length=8, variant="gated")
+    ids = torch.randint(1, 32, (2, 6))
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    native = model(ids, mask, capture=True)
+    overrides = [native.gates[0], torch.zeros_like(native.gates[1])]
+    closed = model(ids, mask, gate_overrides=overrides, capture=True)
+    torch.testing.assert_close(closed.states[1], native.states[1])
+    torch.testing.assert_close(closed.states[2], closed.states[1])
