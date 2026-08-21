@@ -1,0 +1,16 @@
+{
+  "stage": "E2",
+  "seeds": 5,
+  "content_families_per_seed": 90,
+  "counterfactual_pairs": 5400,
+  "replicated_all_task_pair_layer_effects": 8,
+  "replicated_learned_only_effects": 0,
+  "goal_identifiability_utility_correlation": {
+    "pearson_r": 0.01183101203455791,
+    "pearson_p": 0.3847227489006739,
+    "spearman_r": 0.03234591643246123,
+    "spearman_p": 0.01745402279693518
+  },
+  "h1_supported_all_tasks": true,
+  "h1_supported_learned_tasks": false
+}

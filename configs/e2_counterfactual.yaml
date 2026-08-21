@@ -1,0 +1,11 @@
+stage: E2
+description: Same-content/different-goal residual and causal-utility contrasts.
+source_stage: results/e1
+source_config: configs/e1_baseline.yaml
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  minimum_utility_delta: 0.01
+  minimum_seed_fraction: 0.8
+  learned_task_accuracy_floor: 0.75
+  final_test_frozen: true
