@@ -1,0 +1,10 @@
+{
+  "stage": "E1",
+  "seeds": 5,
+  "test_examples_per_seed": 270,
+  "mean_accuracy": 0.6118518518518519,
+  "candidate_harmful_cells": 1,
+  "useful_cells": 9,
+  "uncertain_cells": 2,
+  "strong_interference_supported": false
+}

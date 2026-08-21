@@ -33,6 +33,7 @@ class RunMetadata:
     dtype: str | None = None
     device: str | None = None
     commit_hash: str | None = None
+    repository_dirty: bool | None = None
     python_version: str = field(default_factory=platform.python_version)
     torch_version: str = field(default_factory=lambda: torch.__version__)
     transformers_version: str | None = None
@@ -46,8 +47,14 @@ class RunMetadata:
             commit = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL
             ).strip()
+            dirty = bool(
+                subprocess.check_output(
+                    ["git", "status", "--porcelain"], text=True, stderr=subprocess.DEVNULL
+                ).strip()
+            )
         except (OSError, subprocess.CalledProcessError):
             commit = None
+            dirty = None
         try:
             import transformers
 
@@ -56,6 +63,7 @@ class RunMetadata:
             transformers_version = None
         environment_keys = ("CUDA_VISIBLE_DEVICES", "CUBLAS_WORKSPACE_CONFIG")
         kwargs.setdefault("commit_hash", commit)
+        kwargs.setdefault("repository_dirty", dirty)
         kwargs.setdefault("transformers_version", transformers_version)
         kwargs.setdefault(
             "environment", {key: os.environ[key] for key in environment_keys if key in os.environ}

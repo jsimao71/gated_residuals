@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- revised August 2026}
+\date{Paper 1 research draft --- E1 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. The title and final claim are allowed to pivot toward refinement, conditional computation, or a null characterization if the proposed interference and gating hypotheses fail.
+Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. In the completed E1 run, nine of twelve task--layer cells were useful, one negative-utility cell occurred only on an unlearned task, and the preregistered strong-interference criterion was not met.
 \end{abstract}
 
 \section{Scientific objective}
@@ -248,6 +248,30 @@ Where PRA is available, factorially vary memory materialization and active compu
 Q=Q(k_{\rm memory},k_{\rm compute}).
 \]
 Test whether excess memory increases residual interference and whether goal modulation changes optimal retrieval breadth.
+
+\section{Results to date}
+\subsection{E1: baseline residual map}
+We trained four-layer, width-64 causal residual decoders (150,758 parameters) on deterministic natural-language counterfactual families. Each content triple was paired with maximum, minimum, and modulo-10-sum goals expressed at three lexical-identifiability levels without a task-ID token. Content families were disjoint across 720 training, 180 validation, and 270 frozen test examples. Five independently initialized models used seeds 11, 22, 33, 44, and 55. Thresholds and the test split were fixed in \texttt{configs/e1\_baseline.yaml} before test analysis.
+
+Mean test accuracy was $0.612$ (seed SD $0.039$, range $0.570$--$0.663$). The aggregate concealed a sharp task difference: maximum and minimum accuracy were $0.880$ and $0.858$, whereas modulo-10 sum accuracy was $0.098$, effectively chance for the ten possible answer words. Accuracy did not vary monotonically with the lexical-identifiability manipulation (high $0.613$, medium $0.631$, low $0.591$), so E1 provides no evidence that the nominal identifiability scale alone controlled difficulty.
+
+\begin{table}[ht]
+\centering
+\caption{E1 task-conditioned block classification. Confidence intervals bootstrap seed means; a cell is candidate harmful only when its interval lies below $-0.002$ and at least four of five seed means cross that threshold.}
+\begin{tabular}{lrrrr}
+\toprule
+Task & Useful & Uncertain & Candidate harmful & Strong interference \\
+\midrule
+Maximum & 4 & 0 & 0 & No \\
+Minimum & 4 & 0 & 0 & No \\
+Modulo-10 sum & 1 & 2 & 1 & No \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sole candidate-harmful cell was the final block on modulo-10 sum: mean probability utility was $-0.0073$ with a 95\% seed-bootstrap interval $[-0.0153,-0.0020]$, and four seed means were below the fixed $-0.002$ threshold. This does \emph{not} support strong interference. The affected task was not learned, the fifth seed was near zero, and no example met the preregistered 25\% downstream repair criterion. Moreover, a final block has no later block that could repair its write. We therefore retain this as a negative-utility observation on an underfit task and do not interpret it as a replicated interference mechanism.
+
+Across the learned maximum/minimum tasks, every block was positively useful. Mean task--block utility ranged from $0.095$ to $0.437$ at the limits of the seed-level intervals. The first-cycle E1 result consequently favors distributed refinement over a pervasive harmful-block account. Per-example records, example-bootstrap intervals within seed, seed summaries, manifests, histories, and checkpoints are stored under \texttt{results/e1}. E2 will test the narrower surviving claim that utility changes with goal while content is fixed; it is not licensed to treat negative cosine or the isolated sum result as interference.
 
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.

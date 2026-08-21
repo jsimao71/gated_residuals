@@ -1,0 +1,32 @@
+stage: E1
+description: Preregistered baseline residual map on deterministic counterfactual language families.
+data:
+  generation_seed: 1729
+  train_families: 240
+  val_families: 60
+  test_families: 90
+  distractor_probability: 0.5
+  max_length: 56
+model:
+  width: 64
+  layers: 4
+  heads: 4
+  mlp_ratio: 2
+  max_length: 56
+  dropout: 0.0
+  goal_width: 24
+training:
+  seeds: [11, 22, 33, 44, 55]
+  device: auto
+  epochs: 18
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_grad_norm: 1.0
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  negligible_utility: 0.002
+  minimum_seed_fraction: 0.8
+  repair_fraction: 0.25
+  final_test_frozen: true

@@ -84,6 +84,18 @@ The analytic tests cover known residual cosines, causal utility, amplificationâ€
 attention entropy/support, gate interventions, temporal metrics, PRA recall sparsity, artifacts,
 and exact native-forward parity for a Qwen-style gated adapter fixture.
 
+## Reproduce staged Paper 1 experiments
+
+Run from the repository root with the package source on the Python path. Each stage writes its
+config, run manifests, seed summaries, and derived records beneath `results/`.
+
+```bash
+PYTHONPATH=src python scripts/run_e1.py
+```
+
+E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
+`--reuse-checkpoints` to regenerate E1 analyses without retraining.
+
 ## Released gated-attention comparison
 
 The pinned experiment configuration is `configs/pretrained_gated_attention.yaml`.
