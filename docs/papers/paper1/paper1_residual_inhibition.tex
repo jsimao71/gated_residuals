@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- E1--E6 status, August 2026}
+\date{Paper 1 research draft --- E1--E7 status, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1--E3 did not support interference or selective scalar gating, E4's goal latent lost to ordinary residual summaries, and E5's combined gates failed to suppress the independently labeled negative cell.
+Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We preregister a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe, but do not report pretrained results because the exact checkpoint did not complete a parity forward under the available memory. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1--E3 did not support interference or selective scalar gating, E4's goal latent lost to ordinary residual summaries, and E5's combined gates failed to suppress the independently labeled negative cell.
 \end{abstract}
 
 \section{Scientific objective}
@@ -354,6 +354,13 @@ Native combined accuracy was $0.599$ (seed interval $[0.569,0.624]$), compared w
 
 \subsection{E6 eligibility: hard skipping not run}
 The preregistered E6 audit failed all enabling conditions. E1 did not support strong interference; E3's gated accuracy interval included zero; only $1.69\%$ of gates fell below $0.9$, against a fixed 10\% minimum for a meaningful threshold sweep; and E5 did not show E1-aligned suppression. We therefore did not tune $\epsilon$ or $\lambda$ on the test data and report no quality--compute Pareto curve. Thresholding nearly open gates after observing these nulls would be an unmotivated post-hoc experiment rather than evidence about sufficient activation. The decision and its source values are machine readable under \texttt{results/e6}.
+
+\subsection{E7 status: pretrained transfer not run}
+No pretrained behavioral or gate result is reported. The scientific eligibility audit was negative: E1 found no strong interference, E3 found no gated quality effect, E4's goal latent failed its ordinary-state controls, and E5 found no E1-aligned suppression. We nevertheless tested operational feasibility of the exact pinned headwise checkpoint rather than assuming it was unavailable.
+
+The downloaded BF16 checkpoint at revision \texttt{aad415c45ec6} is 3,443,609,378 bytes and contains 311 tensors with 2,033,181,696 named parameters, including the tied output weight. The available device is a 4,294,836,224-byte GTX 950M. Ordinary loading was killed during CPU materialization under the available host-memory limit. A memory-mapped meta-model recovery then failed with CUDA out-of-memory during direct tensor placement in FP16; a native-BF16 runtime probe passed, but native-BF16 streamed placement also failed. The baseline checkpoint was therefore not downloaded.
+
+Because the real model never completed a forward pass, the fixture-level adapter parity result is not promoted to real-checkpoint parity. Zero pretrained examples were evaluated, and there are no E7 task, gate, correlation, intervention, or baseline-comparison measurements. This is a resource and preregistered scientific stop, not a negative result about the released gated-attention model. Exact device, checkpoint, load-attempt, and decision metadata are stored under \texttt{results/e7}.
 
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.

@@ -1,0 +1,43 @@
+{
+  "stage": "E7",
+  "status": "not_run_scientific_and_resource_stop",
+  "scientifically_eligible": false,
+  "resource_eligible": false,
+  "scientific_evidence": {
+    "strong_interference_supported": false,
+    "gated_quality_effect_excludes_zero": false,
+    "shared_goal_control_supported": false,
+    "e1_aligned_suppression_supported": false
+  },
+  "device": {
+    "cuda_available": true,
+    "name": "NVIDIA GeForce GTX 950M",
+    "total_bytes": 4294836224,
+    "bfloat16_supported": true
+  },
+  "gated_checkpoint": {
+    "downloaded": true,
+    "file_bytes": 3443609378,
+    "tensor_count": 311,
+    "named_parameter_count": 2033181696,
+    "dtypes": [
+      "torch.bfloat16"
+    ],
+    "tied_output_weight_present": true
+  },
+  "load_attempt": {
+    "checkpoint_variant": "1B_gate_headwise",
+    "requested_dtype": "bfloat16",
+    "fallback_dtype": "float16",
+    "reason_for_fallback": "legacy_GPU_kernel_compatibility_precaution",
+    "runtime_bfloat16_probe": "passed",
+    "ordinary_load": "killed_during_cpu_materialization",
+    "fp16_recovery": "mmap_meta_model_direct_gpu_stream_cuda_out_of_memory_before_model_complete",
+    "native_bfloat16_recovery": "cuda_out_of_memory_on_initial_594_MiB_embedding_placement",
+    "real_native_parity_completed": false
+  },
+  "baseline_checkpoint_downloaded": false,
+  "pretrained_examples_evaluated": 0,
+  "pretrained_metrics_are_available": false,
+  "decision": "do_not_download_baseline_or_collect_pretrained_metrics"
+}

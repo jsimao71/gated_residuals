@@ -1,0 +1,98 @@
+{
+  "argv": [
+    "scripts\\run_e7.py"
+  ],
+  "config": {
+    "e7": {
+      "decision_if_ineligible": "do_not_download_baseline_or_collect_pretrained_metrics",
+      "description": "Evidence and resource gate for exact pretrained Qwen3 transfer.",
+      "load_attempt": {
+        "checkpoint_variant": "1B_gate_headwise",
+        "fallback_dtype": "float16",
+        "fp16_recovery": "mmap_meta_model_direct_gpu_stream_cuda_out_of_memory_before_model_complete",
+        "native_bfloat16_recovery": "cuda_out_of_memory_on_initial_594_MiB_embedding_placement",
+        "ordinary_load": "killed_during_cpu_materialization",
+        "real_native_parity_completed": false,
+        "reason_for_fallback": "legacy_GPU_kernel_compatibility_precaution",
+        "requested_dtype": "bfloat16",
+        "runtime_bfloat16_probe": "passed"
+      },
+      "registered_config": "configs/pretrained_gated_attention.yaml",
+      "sources": {
+        "e1": "results/e1/summary.json",
+        "e3": "results/e3/summary.json",
+        "e4": "results/e4/summary.json",
+        "e5": "results/e5/summary.json"
+      },
+      "stage": "E7"
+    },
+    "registered": {
+      "artifacts": {
+        "raw_format": "parquet",
+        "save_raw_activations": false,
+        "summary_format": "csv"
+      },
+      "batch_size": 1,
+      "device": "auto",
+      "dtype": "bfloat16",
+      "experiment_name": "qwen3-gated-attention-probe",
+      "implementation": {
+        "gate_location": "post-SDPA, pre-o_proj",
+        "gate_nonlinearity": "sigmoid",
+        "gate_shape": "batch x token x query_head x 1",
+        "gate_source": "packed q_proj output",
+        "repository": "qiuzh20/gated_attention",
+        "residual_write_location": "post-o_proj",
+        "revision": "f4c2a5f6ffd6ec709e0c60072c95ed4f5ce5b5d2"
+      },
+      "interventions": [
+        "native",
+        "forced_open",
+        "forced_closed",
+        "mean",
+        "shuffled_token",
+        "thresholded"
+      ],
+      "max_seq_len": 2048,
+      "models": {
+        "baseline": {
+          "headwise_attn_output_gate": false,
+          "repository": "QwQZh/gated_attention",
+          "revision": "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b",
+          "subfolder": "1B_baseline"
+        },
+        "gated": {
+          "headwise_attn_output_gate": true,
+          "repository": "QwQZh/gated_attention",
+          "revision": "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b",
+          "subfolder": "1B_gate_headwise"
+        }
+      },
+      "seed": 0
+    }
+  },
+  "metadata": {
+    "batch_size": null,
+    "commit_hash": "3bb85fc2e5865f893829ad67a3142675487f8a9f",
+    "context_length": null,
+    "dataset": "none",
+    "dataset_revision": null,
+    "device": "NVIDIA GeForce GTX 950M",
+    "dtype": "float16_attempted",
+    "environment": {},
+    "gate_tensor_semantics": "batch x token x query_head x 1",
+    "hook_locations": {},
+    "intervention": "none",
+    "model": "QwQZh/gated_attention",
+    "model_revision": "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b",
+    "model_variant": "1B_gate_headwise_resource_audit",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "e7-eligibility",
+    "seed": 0,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

@@ -1,0 +1,19 @@
+stage: E7
+description: Evidence and resource gate for exact pretrained Qwen3 transfer.
+registered_config: configs/pretrained_gated_attention.yaml
+sources:
+  e1: results/e1/summary.json
+  e3: results/e3/summary.json
+  e4: results/e4/summary.json
+  e5: results/e5/summary.json
+load_attempt:
+  checkpoint_variant: 1B_gate_headwise
+  requested_dtype: bfloat16
+  fallback_dtype: float16
+  reason_for_fallback: legacy_GPU_kernel_compatibility_precaution
+  runtime_bfloat16_probe: passed
+  ordinary_load: killed_during_cpu_materialization
+  fp16_recovery: mmap_meta_model_direct_gpu_stream_cuda_out_of_memory_before_model_complete
+  native_bfloat16_recovery: cuda_out_of_memory_on_initial_594_MiB_embedding_placement
+  real_native_parity_completed: false
+decision_if_ineligible: do_not_download_baseline_or_collect_pretrained_metrics
