@@ -1,0 +1,28 @@
+{
+  "stage": "E5",
+  "seeds": 5,
+  "parameter_count": 161026,
+  "comparison_accuracy": {
+    "matched_baseline": 0.6118518710136414,
+    "gate_only": 0.6125925779342651,
+    "goal": 0.5925925925925926,
+    "goal_only": 0.5466666666666666,
+    "goal_gated": 0.5985184907913208
+  },
+  "mean_gate": 0.956542404183635,
+  "median_gate": 0.9557308256626129,
+  "mean_gate_entropy": 0.17349693576279884,
+  "mean_gate_by_e1_classification": {
+    "candidate_harmful": 0.9815534879101647,
+    "redundant_or_uncertain": 0.9410742625925276,
+    "useful": 0.9572007596787111
+  },
+  "useful_minus_harmful_gate": {
+    "mean": -0.024352729320526123,
+    "seed_ci_low": -0.030478183180093765,
+    "seed_ci_high": -0.01940121129155159
+  },
+  "gate_utility_spearman": 0.012765077713016075,
+  "gate_relative_magnitude_spearman": 0.15038738478716132,
+  "e1_aligned_suppression_supported": false
+}

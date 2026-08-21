@@ -144,6 +144,10 @@ class TinyResidualDecoder(nn.Module):
             candidate, attention = block.candidate(residual_input, attention_mask)
             if self.has_gate:
                 gate_source = goal if self.variant == "goal_gated" else summary
+                if self.variant == "goal_gated" and goal_mode == "shuffled":
+                    gate_source = gate_source.roll(1, dims=0)
+                elif self.variant == "goal_gated" and goal_mode == "zero":
+                    gate_source = torch.zeros_like(gate_source)
                 gate = torch.sigmoid(self.gates[layer_index](gate_source))
             else:
                 gate = torch.ones((state.size(0), 1), device=state.device, dtype=state.dtype)

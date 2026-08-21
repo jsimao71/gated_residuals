@@ -1,0 +1,9 @@
+stage: E5
+description: Combined shared goal latent and goal-conditioned scalar residual gates.
+base_config: configs/e1_baseline.yaml
+source_e1_summary: results/e1/layer_task_summary.csv
+controls: [native, forced_open, shuffled_goal, zero_goal]
+statistics:
+  minimum_suppression_difference: 0.01
+  minimum_seed_fraction: 0.8
+  final_test_frozen: true
