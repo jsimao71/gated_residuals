@@ -97,6 +97,7 @@ PYTHONPATH=src python scripts/run_e4.py
 PYTHONPATH=src python scripts/run_e5.py
 PYTHONPATH=src python scripts/run_e6.py
 HF_HOME=/path/to/hf-cache PYTHONPATH=src python scripts/run_e7.py
+PYTHONPATH=src python scripts/run_e8.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -109,6 +110,7 @@ E5 runs the prespecified combined goal-conditioned-gating falsification test.
 E6 is an evidence-gated audit; it does not run hard-skip sweeps when prior criteria fail.
 E7 records scientific and exact-checkpoint resource eligibility. It never emits pretrained metrics
 unless a real native-parity forward has completed.
+E8 audits both factorial axes and does not modify the external PRA checkout.
 
 ## Released gated-attention comparison
 

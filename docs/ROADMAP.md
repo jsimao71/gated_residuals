@@ -13,6 +13,11 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
 - The pretrained Qwen3 headwise gated-attention comparison is integrated as a controlled E7 probe.
 - `docs/METRICS.md` defines the reusable ontology and interpretation limits.
 - `src/gated_residuals` implements the initial architecture-neutral metric and adapter layer.
+- Paper 1's first E1--E5 cycle is complete: learned tasks showed distributed positive block
+  utility, while strong interference, competence-controlled goal utility, selective gating, and a
+  distinct future-utility-predicting goal state were not supported.
+- E6 and E8 stopped at their preregistered evidence gates. E7 also stopped before a real pretrained
+  parity forward because the exact checkpoint exceeded available host/device memory.
 
 ## Proposed series
 
@@ -88,8 +93,8 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Complete the deterministic synthetic counterfactual generator and tiny decoder baseline.
-2. Run E1 block-utility and repair measurements over at least five training seeds.
-3. Freeze confirmatory thresholds and the final counterfactual-family test split.
-4. Run E2 and the matched E3 gate/control matrix only after E1 instrumentation parity passes.
-5. Treat Paper 2--5 drafts as roadmap placeholders until Paper 1 produces evidence.
+1. Design a second-cycle competence-matched task ecology in which every retained goal is learned.
+2. Freeze its family split and effect thresholds before new confirmatory test inspection.
+3. Require nontrivial validation-set gate variation before reopening hard-skip sweeps.
+4. Run the pinned pretrained pair only on hardware that completes real native-forward parity.
+5. Keep Papers 2--5 evidence-conditional; the first cycle does not support expanding their claims.

@@ -1,0 +1,13 @@
+stage: E8
+description: Eligibility audit for PRA memory-selection by computational-selection factorial.
+pra_root: D:/git/rd/pdattention
+sources:
+  e6: results/e6/summary.json
+  e7: results/e7/summary.json
+requirements:
+  pra_model_code: src/pra_hf/model.py
+  pra_config_code: src/pra_hf/config.py
+  routing_checkpoint_glob: docs/papers/shared/results/paper2_hf/routing/learned_adapter/checkpoints/*.pt
+  require_clean_pinned_pra_checkout: true
+  require_validated_compute_axis: true
+decision_if_ineligible: do_not_run_memory_compute_factorial

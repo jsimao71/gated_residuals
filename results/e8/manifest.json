@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "scripts\\run_e8.py"
+  ],
+  "config": {
+    "decision_if_ineligible": "do_not_run_memory_compute_factorial",
+    "description": "Eligibility audit for PRA memory-selection by computational-selection factorial.",
+    "pra_root": "D:/git/rd/pdattention",
+    "requirements": {
+      "pra_config_code": "src/pra_hf/config.py",
+      "pra_model_code": "src/pra_hf/model.py",
+      "require_clean_pinned_pra_checkout": true,
+      "require_validated_compute_axis": true,
+      "routing_checkpoint_glob": "docs/papers/shared/results/paper2_hf/routing/learned_adapter/checkpoints/*.pt"
+    },
+    "sources": {
+      "e6": "results/e6/summary.json",
+      "e7": "results/e7/summary.json"
+    },
+    "stage": "E8"
+  },
+  "metadata": {
+    "batch_size": null,
+    "commit_hash": "b292d532717400a66e8b2042150a3160da7a18e3",
+    "context_length": null,
+    "dataset": "none",
+    "dataset_revision": null,
+    "device": "not_applicable",
+    "dtype": null,
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {},
+    "intervention": "none",
+    "model": "PRA_x_gated_residuals",
+    "model_revision": null,
+    "model_variant": "factorial_audit",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "e8-eligibility",
+    "seed": -1,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "stage": "E8",
+  "status": "not_run_preregistered_stop",
+  "eligible": false,
+  "memory_axis": {
+    "available": true,
+    "pra_code_available": true,
+    "routing_checkpoint_count": 135,
+    "pra_revision": "f3aafd1500b53844ff47c3b47ef04845ff3de282",
+    "pra_branch": "hybrid-pra",
+    "pra_worktree_dirty": true
+  },
+  "compute_axis": {
+    "available": false,
+    "e6_status": "not_run_preregistered_stop",
+    "pretrained_transfer_available": false
+  },
+  "factorial_cells_evaluated": 0,
+  "decision": "do_not_run_memory_compute_factorial",
+  "scientific_interpretation": "PRA memory control exists, but active computation was not validated; crossing it with post-hoc thresholds would not test the registered dual-selection hypothesis."
+}
