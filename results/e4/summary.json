@@ -1,0 +1,68 @@
+{
+  "stage": "E4",
+  "seeds": 5,
+  "parameter_counts": {
+    "goal": 160926,
+    "goal_only": 160926
+  },
+  "mean_goal_model_accuracy": 0.5925925925925926,
+  "mean_goal_only_accuracy": 0.5466666666666666,
+  "mean_goal_shuffled_accuracy": 0.5925925925925926,
+  "mean_goal_zeroed_accuracy": 0.5955555555555555,
+  "probe_summary": {
+    "goal_latent": {
+      "control": "goal_latent",
+      "mean_test_r2": -0.0016806779688770719,
+      "median_test_r2": -0.0024126416409975815,
+      "mean_test_mae": 0.148394383176943,
+      "positive_r2_fraction": 0.5
+    },
+    "current_residual": {
+      "control": "current_residual",
+      "mean_test_r2": 0.03137214577108423,
+      "median_test_r2": 0.05155016078767222,
+      "mean_test_mae": 0.1419598270539312,
+      "positive_r2_fraction": 0.7333333333333333
+    },
+    "pooled_residual": {
+      "control": "pooled_residual",
+      "mean_test_r2": 0.16337395467769722,
+      "median_test_r2": 0.21066839629911988,
+      "mean_test_mae": 0.1312991031465496,
+      "positive_r2_fraction": 0.8333333333333334
+    },
+    "moment_random": {
+      "control": "moment_random",
+      "mean_test_r2": -0.1671415963828288,
+      "median_test_r2": -0.15676462268832914,
+      "mean_test_mae": 0.16248445564148703,
+      "positive_r2_fraction": 0.0
+    },
+    "shuffled_goal": {
+      "control": "shuffled_goal",
+      "mean_test_r2": -0.15269979658362107,
+      "median_test_r2": -0.15102453982981456,
+      "mean_test_mae": 0.16105650997020546,
+      "positive_r2_fraction": 0.0
+    }
+  },
+  "goal_latent_comparisons": {
+    "current_residual": {
+      "mean_r2_advantage": -0.033052823739961296,
+      "win_fraction": 0.3
+    },
+    "pooled_residual": {
+      "mean_r2_advantage": -0.16505463264657425,
+      "win_fraction": 0.13333333333333333
+    },
+    "moment_random": {
+      "mean_r2_advantage": 0.16546091841395177,
+      "win_fraction": 0.9
+    },
+    "shuffled_goal": {
+      "mean_r2_advantage": 0.151019118614744,
+      "win_fraction": 0.8666666666666667
+    }
+  },
+  "shared_goal_control_supported": false
+}

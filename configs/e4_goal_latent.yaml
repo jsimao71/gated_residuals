@@ -1,0 +1,12 @@
+stage: E4
+description: Shared goal latent and held-out prediction of future causal block utility.
+base_config: configs/e1_baseline.yaml
+variants: [goal, goal_only]
+probe:
+  ridge_alpha: 1.0
+  controls: [goal_latent, current_residual, pooled_residual, moment_random, shuffled_goal]
+statistics:
+  minimum_test_r2: 0.02
+  minimum_r2_advantage: 0.01
+  minimum_seed_fraction: 0.8
+  final_test_frozen: true

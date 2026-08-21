@@ -120,6 +120,7 @@ class TinyResidualDecoder(nn.Module):
         skip_layers: set[int] | None = None,
         gate_mode: str = "native",
         gate_overrides: list[torch.Tensor] | None = None,
+        goal_mode: str = "native",
         hard_threshold: float | None = None,
         capture: bool = False,
     ) -> TinyOutput:
@@ -181,6 +182,12 @@ class TinyResidualDecoder(nn.Module):
         last = self._last_token(state, attention_mask)
         if self.has_goal:
             goal_features = self.goal_to_width(goal)
+            if goal_mode == "shuffled":
+                goal_features = goal_features.roll(1, dims=0)
+            elif goal_mode == "zero":
+                goal_features = torch.zeros_like(goal_features)
+            elif goal_mode != "native":
+                raise ValueError(f"unsupported goal mode: {goal_mode}")
             last = goal_features if self.variant == "goal_only" else last + goal_features
         output.logits = self.output(self.final_norm(last))
         return output

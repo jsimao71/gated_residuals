@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- E1--E3 results, August 2026}
+\date{Paper 1 research draft --- E1--E4 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1 did not meet the strong-interference criterion; E2's learned-only goal contrast did not replicate; and E3's scalar gates saturated near open without improving quality.
+Behavioral scores underdetermine how a language model uses depth. This paper is the first experimental test of the Paper~0 dual-selection framework. We ask whether Transformer residual blocks refine an evolving solution, contribute complementary information, or sometimes damage a task-conditioned trajectory that later blocks repair. E1 measures causal block utility and repair in tiny decoder-only Transformers; E2 holds content fixed while changing distributed goal evidence; E3 compares matched baseline and gated residual models. A shared goal latent is secondary, and hard skipping is conditional on a robust E1--E3 signal. We additionally use a released, closely matched Qwen3-based baseline/headwise-gated pair as an external probe: its per-token, per-head sigmoid gate explicitly separates an ungated attention candidate from the effective residual update. Geometry is descriptive, ablation is functional, and the term \emph{strong interference} is reserved for replicated negative utility with later repair. E1--E3 did not support interference or selective scalar gating, and E4's goal latent failed to predict future utility better than ordinary residual summaries.
 \end{abstract}
 
 \section{Scientific objective}
@@ -305,6 +305,31 @@ Candidate-norm rank & .612 & Residual-norm rank & .613 \\
 The gates did not learn selective inhibition. Their mean was $0.977$, median $0.981$, and Bernoulli entropy $0.103$ nats; only $1.69\%$ fell below $0.9$ and none fell below $0.75$. Native-minus-forced-open accuracy was $0.0007$ with interval $[-0.0022,0.0044]$. The cell provisionally marked candidate harmful in E1 (final sum block) received a higher mean gate than all other cells ($0.995$ versus $0.975$), contrary to H3. Gate--utility and gate--relative-magnitude Spearman correlations were $-0.068$ and $0.076$. Their token-level $p$-values are not treated as inferential evidence because observations share examples, layers, and seeds; the effect sizes are small in either case.
 
 Native gated, forced-open, and matched-ungated forwards took approximately $0.203$, $0.194$, and $0.198$ milliseconds per example on the same GPU timing loop. These small differences are timing noise rather than conditional execution: every candidate block was evaluated, active-block fraction was 1, and soft gating saved no FLOPs. Shuffled, task-static, and norm-ranked controls reproduced native accuracy to within two tenths of a percentage point; random binary gates were slightly worse. The mechanistically relevant conclusion is therefore negative: this scalar-gated training run is nearly an ungated network, does not suppress the E1 negative cell, and does not support H3. Artifacts are stored under \texttt{results/e3}.
+
+\subsection{E4: shared goal latent and future utility}
+We trained five shared-latent models and five $z$-only controls. At every block, a 24-dimensional state was updated from its previous value and the final-token residual; no task label supervised $z$. The shared model added a projection of the final $z$ to the output representation, whereas the $z$-only control predicted from that projection alone. Both variants contained 160,926 parameters.
+
+The primary diagnostic fit fixed-$\alpha$ ridge probes on validation families and evaluated them on frozen test families. For each source layer, the probe predicted causal probability utility of every strictly later block. The 30 seed/source/target evaluations therefore avoid using the test split to fit probe weights. Ordinary current and token-pooled residual states, moment-matched random vectors, and independently shuffled goal states were evaluated under the same protocol.
+
+\begin{table}[ht]
+\centering
+\caption{E4 prediction of future block utility on held-out content families.}
+\begin{tabular}{lrrr}
+\toprule
+Probe feature & Mean $R^2$ & Median $R^2$ & Mean MAE \\
+\midrule
+Goal latent $z_l$ & -.002 & -.002 & .148 \\
+Current residual & .031 & .052 & .142 \\
+Pooled residual & .163 & .211 & .131 \\
+Moment-matched random & -.167 & -.157 & .162 \\
+Shuffled $z_l$ & -.153 & -.151 & .161 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The goal latent beat random and shuffled controls, showing that it contains some structured signal, but it did not generalize as a useful future-utility predictor: mean $R^2=-0.002$. Current residuals were modestly predictive and pooled residuals were substantially stronger. Relative to current and pooled states, $z$ lost $0.033$ and $0.165$ mean $R^2$; it exceeded those controls by the fixed 0.01 margin in only $30\%$ and $13\%$ of evaluations. This fails the E4 shared-control-state criterion.
+
+Behavioral interventions agree with the probe result. The shared model reached $0.593$ mean accuracy, below the E1 baseline; shuffling its final goal contribution across examples left mean accuracy at $0.593$, while zeroing it produced $0.596$. The $z$-only model reached $0.547$. These comparisons do not show that $z$ is causally required for the learned behavior. The E1--E4 decision rule therefore selects the weak/null comparative-residual-dynamics path. E5 is retained as the prespecified combined-model falsification test; E6--E8 require a separate eligibility decision rather than automatic expansion. Artifacts are under \texttt{results/e4}.
 
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.

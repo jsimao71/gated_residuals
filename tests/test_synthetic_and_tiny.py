@@ -57,3 +57,13 @@ def test_gate_override_can_close_one_layer_without_changing_other_shapes():
     closed = model(ids, mask, gate_overrides=overrides, capture=True)
     torch.testing.assert_close(closed.states[1], native.states[1])
     torch.testing.assert_close(closed.states[2], closed.states[1])
+
+
+def test_goal_shuffle_is_an_explicit_intervention():
+    model = TinyResidualDecoder(32, width=16, layers=2, heads=4, max_length=8, variant="goal")
+    ids = torch.randint(1, 32, (3, 6))
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    native = model(ids, mask).logits
+    shuffled = model(ids, mask, goal_mode="shuffled").logits
+    assert native.shape == shuffled.shape
+    assert not torch.equal(native, shuffled)

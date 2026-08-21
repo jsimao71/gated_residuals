@@ -93,6 +93,7 @@ config, run manifests, seed summaries, and derived records beneath `results/`.
 PYTHONPATH=src python scripts/run_e1.py
 PYTHONPATH=src python scripts/run_e2.py
 PYTHONPATH=src python scripts/run_e3.py
+PYTHONPATH=src python scripts/run_e4.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -100,6 +101,7 @@ E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
 E2 reuses those checkpoints and performs only paired counterfactual analysis.
 E3 trains the five-seed matched-capacity ungated/gated matrix; pass `--reuse-checkpoints` to
 regenerate its control analyses.
+E4 trains shared-goal and z-only variants and fits validation-to-test future-utility probes.
 
 ## Released gated-attention comparison
 
