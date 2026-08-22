@@ -1,0 +1,2 @@
+cycle,experiment,revision,status,intended_model_family,qwen_end_to_end,qwen_resource_eligible,llama_replication_completed,eligible,checkpoint_selected,models_downloaded,models_evaluated,examples_evaluated,metrics_available,decision
+B,B9,1,not_run_upstream_qwen_and_llama_gates_closed,Gemma,False,False,False,False,False,0,0,0,False,do_not_select_or_download_gemma_checkpoint_until_b7_and_b8_complete

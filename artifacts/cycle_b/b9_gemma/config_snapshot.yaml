@@ -1,0 +1,14 @@
+cycle: B
+experiment: B9
+revision: 1
+description: Conditional Gemma-family replication gate after B7 and B8.
+qwen_summary: artifacts/cycle_b/b7_qwen/summary.json
+llama_summary: artifacts/cycle_b/b8_llama/summary.json
+eligibility:
+  require_qwen_end_to_end: true
+  require_completed_llama_replication: true
+  require_manageable_resource_use: true
+intended_model_family: Gemma
+checkpoint_selection: deferred_until_gate_opens
+output:
+  directory: artifacts/cycle_b/b9_gemma

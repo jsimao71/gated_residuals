@@ -180,6 +180,11 @@ instrumentation smoke run.
   did not select, download, or evaluate a checkpoint because real gated-Qwen parity and the
   reserve-aware resource gate both failed. This is not a Llama result. Decision artifacts are
   under `artifacts/cycle_b/b8_llama`.
+- **B9 conditional stop complete**: the Gemma-family stage remained ineligible because neither the
+  end-to-end Qwen comparison nor a Llama replication completed. It selected and downloaded no
+  checkpoint and produced no Gemma metrics. Decision artifacts are under
+  `artifacts/cycle_b/b9_gemma`. Cycle B1--B9 is now fully accounted for; B8/B9 can be resumed only
+  after their upstream gates change.
 
 ## Released gated-attention comparison
 

@@ -1,0 +1,17 @@
+{
+  "cycle": "B",
+  "experiment": "B9",
+  "revision": 1,
+  "status": "not_run_upstream_qwen_and_llama_gates_closed",
+  "intended_model_family": "Gemma",
+  "qwen_end_to_end": false,
+  "qwen_resource_eligible": false,
+  "llama_replication_completed": false,
+  "eligible": false,
+  "checkpoint_selected": false,
+  "models_downloaded": 0,
+  "models_evaluated": 0,
+  "examples_evaluated": 0,
+  "metrics_available": false,
+  "decision": "do_not_select_or_download_gemma_checkpoint_until_b7_and_b8_complete"
+}

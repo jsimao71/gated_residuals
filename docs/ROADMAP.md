@@ -42,6 +42,9 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   examples or gate metrics exist and the conditional B8/B9 gate remains closed.
 - B8 recorded its conditional Llama-family stop: no checkpoint selection, download, model forward,
   or metric collection was permitted because B7 did not complete the exact gated comparison.
+- B9 recorded the downstream Gemma-family stop. With B7 incomplete end to end and B8 containing no
+  model result, no Gemma checkpoint or cross-family metric was permitted. Cycle B1--B9 is fully
+  accounted for, including its conditional stops.
 
 ## Proposed series
 
@@ -120,6 +123,6 @@ Tests whether broad memory activation plus computational gating improves recall 
 1. Retain B7's standard-Qwen atlas as a real-checkpoint adapter validation, not a gated comparison.
 2. Run the pinned baseline/headwise release only on hardware with enough headroom to complete real
    native parity and interventions.
-3. Keep B8/B9 closed until that Qwen path works end to end; record the conditional stops explicitly.
+3. Keep the recorded B8/B9 stops closed until the Qwen path works end to end; then resume in order.
 4. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
 5. Keep Papers 2--5 evidence-conditional; Cycle A through B7 do not support expanding their claims.

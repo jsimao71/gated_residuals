@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "scripts/run_b9.py"
+  ],
+  "config": {
+    "checkpoint_selection": "deferred_until_gate_opens",
+    "cycle": "B",
+    "description": "Conditional Gemma-family replication gate after B7 and B8.",
+    "eligibility": {
+      "require_completed_llama_replication": true,
+      "require_manageable_resource_use": true,
+      "require_qwen_end_to_end": true
+    },
+    "experiment": "B9",
+    "intended_model_family": "Gemma",
+    "llama_summary": "artifacts/cycle_b/b8_llama/summary.json",
+    "output": {
+      "directory": "artifacts/cycle_b/b9_gemma"
+    },
+    "qwen_summary": "artifacts/cycle_b/b7_qwen/summary.json",
+    "revision": 1
+  },
+  "metadata": {
+    "batch_size": null,
+    "commit_hash": "015c07ebfa3762311c450ce4c026463eaa9dd3d5",
+    "context_length": null,
+    "dataset": "none",
+    "dataset_revision": null,
+    "device": "not_allocated",
+    "dtype": null,
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {},
+    "intervention": "none",
+    "model": "not_selected",
+    "model_revision": null,
+    "model_variant": "gemma_conditional_stop",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "cycle-b-b9-eligibility",
+    "seed": 0,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}
