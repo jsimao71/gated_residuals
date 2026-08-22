@@ -1,0 +1,49 @@
+cycle: C
+experiment: C2
+revision: 1
+description: Goal-cue difficulty and minimum-depth sweeps after the fixed C1 learnability comparison.
+variants: [baseline, static_scale, gated, sa_ff_gated]
+difficulty_regimes:
+  high: [high]
+  medium: [medium]
+  low: [low]
+  mixed: [high, medium, low]
+difficulty_order: [high, medium, low]
+depth_regime: mixed
+depths: [4, 8, 12, 16]
+reuse:
+  high_depth16: artifacts/cycle_c/c1_learning_curves
+data:
+  generation_seed: 2718
+  train_families: 240
+  val_families: 60
+  test_families: 60
+  distractor_probability: 0.5
+  intents: [maximum, minimum, first, middle, last]
+  identifiability_levels: [high]
+  max_length: 64
+model:
+  width: 64
+  layers: 16
+  heads: 4
+  mlp_ratio: 2
+  max_length: 64
+  dropout: 0.0
+  goal_width: 24
+training:
+  seeds: [11, 22, 33, 44, 55]
+  device: auto
+  epochs: 24
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_grad_norm: 1.0
+  eval_every_steps: 20
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  competence_accuracy: 0.90
+  minimum_seed_fraction: 0.80
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_c/c2_difficulty_depth

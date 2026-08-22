@@ -77,7 +77,14 @@ def update_diagnostics(model, batch, device: str) -> dict[str, float]:
     }
 
 
-def train_run(config: dict, variant: str, seed: int, run_dir: Path):
+def train_run(
+    config: dict,
+    variant: str,
+    seed: int,
+    run_dir: Path,
+    *,
+    run_id: str | None = None,
+):
     seed_everything(seed)
     splits, vocabulary, datasets = prepare_data(config)
     device = resolve_device(config["training"].get("device", "auto"))
@@ -197,8 +204,11 @@ def train_run(config: dict, variant: str, seed: int, run_dir: Path):
     )
     (run_dir / "history.json").write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
     save_records_parquet(run_dir / "learning_curve.parquet", records)
+    experiment = str(config["experiment"])
+    cycle = str(config["cycle"])
+    run_id = run_id or f"{variant}-seed-{seed}"
     metadata = RunMetadata.collect(
-        run_id=f"c1-{variant}-seed-{seed}",
+        run_id=f"{experiment.lower()}-{run_id}",
         model="tiny_residual_decoder",
         model_variant=variant,
         dataset="synthetic_counterfactual_v2_selection",
@@ -214,10 +224,10 @@ def train_run(config: dict, variant: str, seed: int, run_dir: Path):
     )
     save_manifest(run_dir / "manifest.json", metadata, config)
     registry = {
-        "cycle": "C",
-        "experiment": "C1",
+        "cycle": cycle,
+        "experiment": experiment,
         "revision": int(config["revision"]),
-        "run_id": f"{variant}-seed-{seed}",
+        "run_id": run_id,
         "variant": variant,
         "seed": seed,
         "depth": model.num_layers,

@@ -1,0 +1,44 @@
+{
+  "cycle": "C",
+  "experiment": "C2",
+  "revision": 1,
+  "source_commit": "32414f3dea43768e86546910e118b369a84051aa",
+  "new_runs": 120,
+  "registry_rows_including_reuse": 160,
+  "curve_rows": 3840,
+  "competence_accuracy": 0.9,
+  "boundaries": [
+    {
+      "variant": "baseline",
+      "maximum_reliably_learned_directness_difficulty": "low",
+      "mixed_cue_reliably_competent_depth16": false,
+      "lowest_qualifying_depth_mixed": null,
+      "monotone_minimum_depth_mixed": null
+    },
+    {
+      "variant": "static_scale",
+      "maximum_reliably_learned_directness_difficulty": "low",
+      "mixed_cue_reliably_competent_depth16": false,
+      "lowest_qualifying_depth_mixed": 8,
+      "monotone_minimum_depth_mixed": null
+    },
+    {
+      "variant": "gated",
+      "maximum_reliably_learned_directness_difficulty": "low",
+      "mixed_cue_reliably_competent_depth16": false,
+      "lowest_qualifying_depth_mixed": null,
+      "monotone_minimum_depth_mixed": null
+    },
+    {
+      "variant": "sa_ff_gated",
+      "maximum_reliably_learned_directness_difficulty": "low",
+      "mixed_cue_reliably_competent_depth16": false,
+      "lowest_qualifying_depth_mixed": null,
+      "monotone_minimum_depth_mixed": null
+    }
+  ],
+  "training_seconds_sum": 14486.785709799733,
+  "stage_wall_seconds": null,
+  "postprocess_only": true,
+  "interpretation": "Difficulty is goal-cue directness; mixed is a cue-diversity condition, not a fourth point on the directness scale. Depth qualification is validation-defined, and a minimum-depth claim additionally requires every tested deeper condition to qualify."
+}

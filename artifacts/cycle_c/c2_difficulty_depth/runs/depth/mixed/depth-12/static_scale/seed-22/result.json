@@ -1,0 +1,23 @@
+{
+  "cycle": "C",
+  "experiment": "C2",
+  "revision": 1,
+  "run_id": "depth-mixed-depth12-static_scale-seed-22",
+  "variant": "static_scale",
+  "seed": 22,
+  "depth": 12,
+  "width": 64,
+  "parameters": 419187,
+  "training_steps": 456,
+  "tokens_seen": 999048,
+  "training_seconds": 69.53718129987828,
+  "final_val_loss": 0.7853920046488444,
+  "final_val_accuracy": 0.8,
+  "final_test_loss": 1.065939343770345,
+  "final_test_accuracy": 0.7266666666666667,
+  "checkpoint": "artifacts/cycle_c/c2_difficulty_depth/runs/depth/mixed/depth-12/static_scale/seed-22/model.pt",
+  "device": "cuda",
+  "sweep": "depth",
+  "difficulty_regime": "mixed",
+  "reused_from": null
+}

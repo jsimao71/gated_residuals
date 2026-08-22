@@ -1,0 +1,128 @@
+{
+  "argv": [
+    "scripts/run_c2.py",
+    "--train-only"
+  ],
+  "config": {
+    "cycle": "C",
+    "data": {
+      "distractor_probability": 0.5,
+      "generation_seed": 2718,
+      "identifiability_levels": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "intents": [
+        "maximum",
+        "minimum",
+        "first",
+        "middle",
+        "last"
+      ],
+      "max_length": 64,
+      "test_families": 60,
+      "train_families": 240,
+      "val_families": 60
+    },
+    "depth_regime": "mixed",
+    "depths": [
+      4,
+      8,
+      12,
+      16
+    ],
+    "description": "Goal-cue difficulty and minimum-depth sweeps after the fixed C1 learnability comparison.",
+    "difficulty_order": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "difficulty_regimes": {
+      "high": [
+        "high"
+      ],
+      "low": [
+        "low"
+      ],
+      "medium": [
+        "medium"
+      ],
+      "mixed": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "experiment": "C2",
+    "model": {
+      "dropout": 0.0,
+      "goal_width": 24,
+      "heads": 4,
+      "layers": 4,
+      "max_length": 64,
+      "mlp_ratio": 2,
+      "width": 64
+    },
+    "output": {
+      "directory": "artifacts/cycle_c/c2_difficulty_depth"
+    },
+    "reuse": {
+      "high_depth16": "artifacts/cycle_c/c1_learning_curves"
+    },
+    "revision": 1,
+    "statistics": {
+      "bootstrap_samples": 2000,
+      "competence_accuracy": 0.9,
+      "confidence": 0.95,
+      "final_test_frozen": true,
+      "minimum_seed_fraction": 0.8
+    },
+    "training": {
+      "batch_size": 64,
+      "device": "auto",
+      "epochs": 24,
+      "eval_every_steps": 20,
+      "learning_rate": 0.001,
+      "max_grad_norm": 1.0,
+      "seeds": [
+        11,
+        22,
+        33,
+        44,
+        55
+      ],
+      "weight_decay": 0.0001
+    },
+    "variants": [
+      "baseline",
+      "static_scale",
+      "gated",
+      "sa_ff_gated"
+    ]
+  },
+  "metadata": {
+    "batch_size": 64,
+    "commit_hash": "32414f3dea43768e86546910e118b369a84051aa",
+    "context_length": 64,
+    "dataset": "synthetic_counterfactual_v2_selection",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "float32",
+    "environment": {},
+    "gate_tensor_semantics": "sigmoid residual multiplier",
+    "hook_locations": {},
+    "intervention": "native",
+    "model": "tiny_residual_decoder",
+    "model_revision": null,
+    "model_variant": "gated",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "c2-depth-mixed-depth4-gated-seed-22",
+    "seed": 22,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

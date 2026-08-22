@@ -1,0 +1,23 @@
+{
+  "cycle": "C",
+  "experiment": "C2",
+  "revision": 1,
+  "run_id": "depth-mixed-depth8-baseline-seed-33",
+  "variant": "baseline",
+  "seed": 33,
+  "depth": 8,
+  "width": 64,
+  "parameters": 285287,
+  "training_steps": 456,
+  "tokens_seen": 999048,
+  "training_seconds": 46.75880010006949,
+  "final_val_loss": 0.3266631317138672,
+  "final_val_accuracy": 0.8966666666666666,
+  "final_test_loss": 0.5405941645304362,
+  "final_test_accuracy": 0.8466666666666667,
+  "checkpoint": "artifacts/cycle_c/c2_difficulty_depth/runs/depth/mixed/depth-8/baseline/seed-33/model.pt",
+  "device": "cuda",
+  "sweep": "depth",
+  "difficulty_regime": "mixed",
+  "reused_from": null
+}

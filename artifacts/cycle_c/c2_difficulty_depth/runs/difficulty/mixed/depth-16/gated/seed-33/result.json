@@ -1,0 +1,23 @@
+{
+  "cycle": "C",
+  "experiment": "C2",
+  "revision": 1,
+  "run_id": "difficulty-mixed-depth16-gated-seed-33",
+  "variant": "gated",
+  "seed": 33,
+  "depth": 16,
+  "width": 64,
+  "parameters": 554103,
+  "training_steps": 456,
+  "tokens_seen": 999048,
+  "training_seconds": 156.08834760007448,
+  "final_val_loss": 0.20605198701222738,
+  "final_val_accuracy": 0.94,
+  "final_test_loss": 0.43910910924275715,
+  "final_test_accuracy": 0.88,
+  "checkpoint": "artifacts/cycle_c/c2_difficulty_depth/runs/difficulty/mixed/depth-16/gated/seed-33/model.pt",
+  "device": "cuda",
+  "sweep": "difficulty",
+  "difficulty_regime": "mixed",
+  "reused_from": null
+}

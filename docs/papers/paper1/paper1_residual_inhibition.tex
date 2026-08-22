@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\Learnability, Allocation, and Causal Dynamics}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- Cycle A, Cycle B1--B9, and Cycle C1 results, August 2026}
+\date{Paper 1 research draft --- Cycle A, Cycle B1--B9, and Cycle C1--C2 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair. Gates saturated near open and did not improve quality. Cycle B1 computed an exhaustive residual atlas; B2 separated self-attention (SA) and feed-forward (FF) writes; and B3 found no joint vector-plus-task repair in 12,150 trajectories. B4 trained 25 depth/capacity runs and found localized negative/near-zero utility without establishing competence-preserving slack. B5 repaired the task ecology using five value-selection goals: all five tasks and all ten pairs matched, 13 task-conditioned utility contrasts replicated, and minimum layer 8 had negative block and FF utility. B6 gates were causally consequential but matched ungated quality, tracked magnitude better than utility, and did not eliminate the negative layer. B7 then validated exact instrumentation parity on a real Qwen3-0.6B model and found positive mean SA/block utility at every layer on predictable sequences; no negative FF layer excluded zero. The exact gated release remained outside measured memory headroom, so no gated-Qwen result exists and conditional B8/B9 stopped before model selection. Cycle C1 compared dense residuals, static learned scales, dynamic block gates, and separate SA/FF gates across 20 fixed-budget runs. Paired learning-curve AUC intervals all included zero and final accuracy saturated near 99\%, so C1 finds amplitude allocation without a reliable learnability gain. The evidence supports competence-matched task-conditioned computation and functional soft modulation, but not repair, strong interference, realized compute savings, or a quality/learning-speed advantage from gates.
+Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair. Gates saturated near open and did not improve quality. Cycle B1 computed an exhaustive residual atlas; B2 separated self-attention (SA) and feed-forward (FF) writes; and B3 found no joint vector-plus-task repair in 12,150 trajectories. B4 trained 25 depth/capacity runs and found localized negative/near-zero utility without establishing competence-preserving slack. B5 repaired the task ecology using five value-selection goals: all five tasks and all ten pairs matched, 13 task-conditioned utility contrasts replicated, and minimum layer 8 had negative block and FF utility. B6 gates were causally consequential but matched ungated quality, tracked magnitude better than utility, and did not eliminate the negative layer. B7 then validated exact instrumentation parity on a real Qwen3-0.6B model and found positive mean SA/block utility at every layer on predictable sequences; no negative FF layer excluded zero. The exact gated release remained outside measured memory headroom, so no gated-Qwen result exists and conditional B8/B9 stopped before model selection. Cycle C1 compared dense residuals, static learned scales, dynamic block gates, and separate SA/FF gates across 20 fixed-budget runs. Paired learning-curve AUC intervals all included zero and final accuracy saturated near 99\%, so C1 finds amplitude allocation without a reliable learnability gain. C2 added 120 runs: every variant learned all single goal-cue regimes, but all failed reliable competence under mixed cues at depth 16. Static scaling alone qualified at depth 8, then failed at 12/16, so no variant supports a monotone minimum-depth claim. The evidence supports competence-matched task-conditioned computation and functional soft modulation, but not repair, strong interference, realized compute savings, or a reliable quality/learning-speed advantage from dynamic gates.
 \end{abstract}
 
 \section{Scientific objective}
@@ -585,6 +585,39 @@ The optimization diagnostics show real amplitude changes without a learnability 
 
 C1 therefore preserves the null that final accuracy alone cannot justify gating and adds a stronger learnability null under matched training exposure. It does not establish that dynamic conditioning is useless: task difficulty and minimum necessary depth were held fixed at a regime that all variants mastered. C2 consequently tests whether any optimization or effective-capacity distinction emerges as difficulty rises or depth becomes limiting, without changing the C1 result after seeing that sweep.
 
+\subsection{C2: goal-cue difficulty and depth}
+C2 added 120 fixed-budget runs and reused the 20 identical C1 high-identifiability depth-16 runs. Four goal-cue regimes were frozen: direct high-identifiability wording, indirect medium wording, oblique low wording, and a separate mixed-cue condition cycling all three forms. The first three form the preregistered directness ladder; mixed cues measure wording diversity and are not treated as a fourth ordinal directness level. Every run retained the five B5 value-selection tasks, paired seeds, 24 epochs, and fixed optimizer schedule. Reliable competence required mean validation accuracy at least .90 and at least four of five seed accuracies at least .90.
+
+All four variants reliably learned high, medium, and low single-cue regimes. At low identifiability, mean validation/test accuracy was .980/.964 dense, .980/.965 static-scale, .972/.971 block-gated, and .973/.963 SA/FF-gated. Mean normalized learning-curve AUC ranged only from .751 to .755. Thus the maximum reliably learned point on the directness ladder was the oblique low-identifiability wording for every variant; dynamic conditioning did not extend that boundary.
+
+Mixed cues created the actual capacity/optimization stress. At depth 16, mean validation accuracy fell to .858 dense, .869 static, .865 block-gated, and .849 SA/FF-gated; only one, two, two, and one seeds respectively reached .90. Paired mixed-cue AUC differences versus dense were $-.00002$ [95\% interval $-.00091,.00081$] for static, $-.00210$ [$-.00732,.00219$] for block gates, and $.00026$ [$-.00472,.00532$] for SA/FF gates. No dynamic variant reliably improved convergence or final validation quality.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Variant & Depth 4 & Depth 8 & Depth 12 & Depth 16 \\
+\midrule
+Dense & .742 (1/5) & .884 (2/5) & .873 (2/5) & .858 (1/5) \\
+Static scale & .759 (1/5) & .901 (4/5) & .889 (2/5) & .869 (2/5) \\
+Block gate & .768 (1/5) & .893 (3/5) & .879 (2/5) & .865 (2/5) \\
+SA/FF gates & .756 (1/5) & .891 (3/5) & .862 (2/5) & .849 (1/5) \\
+\bottomrule
+\end{tabular}
+\caption{C2 mixed-cue mean validation accuracy with number of individually competent seeds. The registered cell criterion requires mean $\geq.90$ and at least 4/5 competent seeds.}
+\end{table}
+
+Depth was strongly non-monotonic. Only static scaling at depth 8 crossed the literal cell rule, with .901 mean validation and four competent seeds; its paired validation improvement over dense was .0167 [.0007,.0300]. However, its mean frozen-test accuracy was lower than dense (.841 versus .848), the paired test interval crossed zero, and the same static variant failed at depths 12 and 16. No other variant qualified at any depth. We therefore record depth 8 as the \emph{lowest qualifying static-scale cell}, not a minimum necessary depth: no variant has a depth after which every tested deeper model remains reliably competent.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.98\linewidth]{../../../artifacts/cycle_c/c2_difficulty_depth/figures/c2_difficulty_depth.pdf}
+\caption{C2 goal-cue and mixed-depth results. Dashed lines mark the .90 validation threshold. Mixed-cue performance is non-monotonic in depth and highly seed-sensitive.}
+\end{figure}
+
+C2 sharpens the C1 null. Dynamic gates neither extend the single-cue difficulty boundary nor solve mixed-cue optimization. Static scaling produces one fragile validation-qualified depth-8 cell, consistent with an optimization reparameterization rather than task-conditioned selection: it does not persist at greater depth or improve frozen-test accuracy reliably. C3 therefore introduces explicit sparsity pressure to test a different claim---quality versus active computation---without treating C2 as evidence that gates improve effective capacity.
+
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.
 
@@ -616,6 +649,8 @@ Cycle A answers its bounded causal question with a constrained null. On tasks th
 Cycle B1--B9 expands what is known without rewriting that null. The residual carrier changes more smoothly across depth than candidate writes, exact SA/FF intervention shows causal asymmetry, and B3 finds no joint repair. B4 adds localized negative and near-zero sublayers but fails the strict slack criterion. B5 supplies the missing competence control: five tasks and all ten pairs match, 13 task-conditioned utility contrasts replicate, and minimum layer 8 has negative block/FF utility. B6 shows that deep learned gates are functionally consequential under forced-open and shuffled interventions, unlike Cycle A's saturated gates. However, native quality merely matches baseline, gate--utility alignment is weaker than gate--magnitude alignment, the negative cell persists, and no candidate computation is skipped. B7 validates exact real-model instrumentation and reproduces SA/FF causal asymmetry in standard Qwen3-0.6B, but the matched gated checkpoint remains unevaluated under an explicit resource stop. B8 and B9 consequently record conditional Llama and Gemma stops with zero models or examples. The combined result supports task-conditioned residual dynamics, soft amplitude modulation, and portable measurement semantics, not repair, strong interference, a quality--compute benefit, or gated/cross-family transfer.
 
 Cycle C1 asks a different question of that same mechanism: whether amplitude allocation changes how efficiently competence is learned. Across 20 fixed-budget runs, static and dynamic controls all reached essentially the same saturated final quality. Separate SA/FF gates had the largest AUC point estimate, but its paired interval included zero; whole-block gating was slightly slower on average and also inconclusive. Gates reduced effective relative to candidate update norms, yet did not reliably improve AUC, threshold steps, tokens, or wall time. The next evidential boundary is therefore difficulty and minimum depth, not a post-hoc claim that gating wins on the C1 ecology.
+
+C2 finds that boundary in cue diversity rather than single-cue directness. Every architecture reliably learned each fixed wording regime, including oblique low-identifiability prompts, while all four failed the mixed-cue depth-16 criterion. Depth did not behave as a monotone capacity axis: the sole qualifying cell was static scaling at depth 8, and that validation advantage neither survived at greater depth nor produced a reliable frozen-test gain. Dynamic gates consequently show no learnability or effective-capacity advantage through C2. The next stage tests whether an explicit sparsity objective can instead create a quality--active-compute frontier.
 
 \begin{thebibliography}{9}
 \bibitem{kornblith2019cka}

@@ -199,6 +199,12 @@ instrumentation smoke run.
   99% validation competence. Gates attenuated effective update norms, but did not establish a
   learning-speed or final-quality advantage. Artifacts are under
   `artifacts/cycle_c/c1_learning_curves`.
+- **C2 complete**: 120 new runs plus 20 reused C1 cells tested high/medium/low goal-cue
+  directness, mixed-cue diversity, and depths 4/8/12/16. Every variant reliably learned all
+  single-cue regimes, but none passed the mixed-cue criterion at depth 16. Static scaling alone
+  qualified at depth 8 (.901 mean validation; 4/5 seeds), then failed at depths 12/16 and did not
+  reliably improve frozen-test accuracy. This is an isolated qualifying cell, not a monotone
+  minimum-depth result. Artifacts are under `artifacts/cycle_c/c2_difficulty_depth`.
 
 ## Released gated-attention comparison
 

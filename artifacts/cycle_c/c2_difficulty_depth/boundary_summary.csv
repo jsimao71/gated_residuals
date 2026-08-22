@@ -1,0 +1,5 @@
+lowest_qualifying_depth_mixed,maximum_reliably_learned_directness_difficulty,mixed_cue_reliably_competent_depth16,monotone_minimum_depth_mixed,variant
+,low,False,,baseline
+8,low,False,,static_scale
+,low,False,,gated
+,low,False,,sa_ff_gated

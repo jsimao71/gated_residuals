@@ -1,0 +1,23 @@
+{
+  "cycle": "C",
+  "experiment": "C2",
+  "revision": 1,
+  "run_id": "depth-mixed-depth8-sa_ff_gated-seed-22",
+  "variant": "sa_ff_gated",
+  "seed": 22,
+  "depth": 8,
+  "width": 64,
+  "parameters": 286327,
+  "training_steps": 456,
+  "tokens_seen": 999048,
+  "training_seconds": 52.87622190010734,
+  "final_val_loss": 0.3980195172627767,
+  "final_val_accuracy": 0.88,
+  "final_test_loss": 0.6157600911458333,
+  "final_test_accuracy": 0.8333333333333334,
+  "checkpoint": "artifacts/cycle_c/c2_difficulty_depth/runs/depth/mixed/depth-8/sa_ff_gated/seed-22/model.pt",
+  "device": "cuda",
+  "sweep": "depth",
+  "difficulty_regime": "mixed",
+  "reused_from": null
+}

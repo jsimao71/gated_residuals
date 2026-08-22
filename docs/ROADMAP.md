@@ -50,6 +50,11 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   change learning-curve AUC or saturated final accuracy versus dense residuals, despite clear
   attenuation of effective updates. C2 will test whether the null changes with task difficulty or
   minimum required depth.
+- C2 completed 120 new fixed-budget runs. All four variants learned direct, indirect, and oblique
+  single-cue regimes, while mixed cue forms defeated reliable depth-16 competence. The only
+  qualifying mixed-depth cell was static scaling at depth 8; deeper static models failed and the
+  frozen-test advantage was not reliable, so no monotone minimum depth was established. Dynamic
+  gates did not extend the difficulty or capacity boundary. C3 will test explicit sparsity pressure.
 
 ## Proposed series
 
@@ -125,8 +130,8 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Run Cycle C2 difficulty and minimum-depth sweeps without revising the fixed C1 null.
-2. Continue to sparsity pressure and hard depth routing only after their instrumentation tests pass.
+1. Run Cycle C3 sparsity-pressure sweeps without revising the fixed C1/C2 learnability nulls.
+2. Continue to hard depth routing only after sparsity instrumentation and realized-skip tests pass.
 3. Retain B7's standard-Qwen atlas as a real-checkpoint adapter validation, not a gated comparison.
 4. Run the pinned gated release only on hardware with enough headroom; do not block ordinary Qwen,
    Llama, or Gemma residual science on that resource condition.
