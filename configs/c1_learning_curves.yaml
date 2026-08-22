@@ -1,0 +1,38 @@
+cycle: C
+experiment: C1
+revision: 1
+description: Fixed-budget learnability comparison of dense, static, block-gated, and SA/FF-gated residual updates.
+variants: [baseline, static_scale, gated, sa_ff_gated]
+data:
+  generation_seed: 2718
+  train_families: 240
+  val_families: 60
+  test_families: 60
+  distractor_probability: 0.5
+  intents: [maximum, minimum, first, middle, last]
+  identifiability_levels: [high]
+  max_length: 64
+model:
+  width: 64
+  layers: 16
+  heads: 4
+  mlp_ratio: 2
+  max_length: 64
+  dropout: 0.0
+  goal_width: 24
+training:
+  seeds: [11, 22, 33, 44, 55]
+  device: auto
+  epochs: 24
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_grad_norm: 1.0
+  eval_every_steps: 10
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  competence_thresholds: [0.80, 0.90, 0.95, 0.99]
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_c/c1_learning_curves

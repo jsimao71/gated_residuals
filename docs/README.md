@@ -11,12 +11,15 @@ Paper 1 is the first experimental instantiation. It tests whether Transformer re
 refine, complement, or interfere with task-conditioned trajectories, and whether explicit gates
 select updates with independently measurable downstream consequences.
 
-Cycle B now extends that fixed first-cycle baseline. B1 ran the exhaustive residual atlas over all
+Cycle B extended that fixed first-cycle baseline. B1 ran the exhaustive residual atlas over all
 30 stored Cycle A checkpoints before new training. B2 is also complete: self-attention and
 feed-forward writes are captured at distinct pre-norm locations and intervened on separately with
 exact native parity. B3's stability and amplification--repair atlas is complete, and B4 completed
 the five-condition depth/capacity sweep. B5 now supplies a competence-matched five-task ecology.
-Gating and pretrained stages remain evidence and instrumentation gated.
+Cycle C now tests learnability and conditional allocation. C1 is complete: dense, static-scale,
+whole-block gated, and separate SA/FF-gated depth-16 models were trained for identical steps and
+tokens across five paired seeds. Dynamic gates changed update amplitude but did not reliably
+improve learning-curve AUC or final quality.
 
 Start with:
 
@@ -111,6 +114,7 @@ PYTHONPATH=src python scripts/run_b3.py
 PYTHONPATH=src python scripts/run_b4.py
 PYTHONPATH=src python scripts/run_b5.py
 PYTHONPATH=src python scripts/run_b6.py
+PYTHONPATH=src python scripts/run_c1.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -185,6 +189,16 @@ instrumentation smoke run.
   checkpoint and produced no Gemma metrics. Decision artifacts are under
   `artifacts/cycle_b/b9_gemma`. Cycle B1--B9 is now fully accounted for; B8/B9 can be resumed only
   after their upstream gates change.
+
+## Cycle C status
+
+- **C1 complete**: 20 runs, each with 456 optimizer steps and 924,168 non-padding training tokens.
+  Mean normalized learning-curve AUC was 0.7820 dense, 0.7823 static scale, 0.7796 whole-block
+  gated, and 0.7854 separate SA/FF gated. Every paired AUC interval versus dense included zero.
+  Frozen-test accuracy was 0.991--0.993 across variants; one whole-block-gate seed did not reach
+  99% validation competence. Gates attenuated effective update norms, but did not establish a
+  learning-speed or final-quality advantage. Artifacts are under
+  `artifacts/cycle_c/c1_learning_curves`.
 
 ## Released gated-attention comparison
 

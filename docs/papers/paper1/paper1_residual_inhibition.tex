@@ -3,12 +3,12 @@
 \usepackage{amsmath,amssymb,booktabs,graphicx,hyperref,microtype,enumitem,array}
 \usepackage[T1]{fontenc}
 \microtypesetup{expansion=false}
-\title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
+\title{Selective Residual Computation:\\Learnability, Allocation, and Causal Dynamics}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- Cycle A and Cycle B1--B9 results, August 2026}
+\date{Paper 1 research draft --- Cycle A, Cycle B1--B9, and Cycle C1 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair. Gates saturated near open and did not improve quality. Cycle B1 computed an exhaustive residual atlas; B2 separated self-attention (SA) and feed-forward (FF) writes; and B3 found no joint vector-plus-task repair in 12,150 trajectories. B4 trained 25 depth/capacity runs and found localized negative/near-zero utility without establishing competence-preserving slack. B5 repaired the task ecology using five value-selection goals: all five tasks and all ten pairs matched, 13 task-conditioned utility contrasts replicated, and minimum layer 8 had negative block and FF utility. B6 gates were causally consequential but matched ungated quality, tracked magnitude better than utility, and did not eliminate the negative layer. B7 then validated exact instrumentation parity on a real Qwen3-0.6B model and found positive mean SA/block utility at every layer on predictable sequences; no negative FF layer excluded zero. The exact gated release remained outside measured memory headroom, so no gated-Qwen result exists and conditional B8/B9 stopped before model selection. Cycle B supports competence-matched task-conditioned computation and functional soft modulation, but not repair, strong interference, realized compute savings, a quality gain over baseline, or gated/cross-family transfer.
+Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair. Gates saturated near open and did not improve quality. Cycle B1 computed an exhaustive residual atlas; B2 separated self-attention (SA) and feed-forward (FF) writes; and B3 found no joint vector-plus-task repair in 12,150 trajectories. B4 trained 25 depth/capacity runs and found localized negative/near-zero utility without establishing competence-preserving slack. B5 repaired the task ecology using five value-selection goals: all five tasks and all ten pairs matched, 13 task-conditioned utility contrasts replicated, and minimum layer 8 had negative block and FF utility. B6 gates were causally consequential but matched ungated quality, tracked magnitude better than utility, and did not eliminate the negative layer. B7 then validated exact instrumentation parity on a real Qwen3-0.6B model and found positive mean SA/block utility at every layer on predictable sequences; no negative FF layer excluded zero. The exact gated release remained outside measured memory headroom, so no gated-Qwen result exists and conditional B8/B9 stopped before model selection. Cycle C1 compared dense residuals, static learned scales, dynamic block gates, and separate SA/FF gates across 20 fixed-budget runs. Paired learning-curve AUC intervals all included zero and final accuracy saturated near 99\%, so C1 finds amplitude allocation without a reliable learnability gain. The evidence supports competence-matched task-conditioned computation and functional soft modulation, but not repair, strong interference, realized compute savings, or a quality/learning-speed advantage from gates.
 \end{abstract}
 
 \section{Scientific objective}
@@ -230,6 +230,13 @@ The registered Cycle B hypotheses are:
 \item \textbf{H-B7 (partial cross-family regularity):} some normalized signatures persist in Llama/Gemma while others remain architecture sensitive.
 \end{enumerate}
 These hypotheses are post-Cycle-A but prospective for the Cycle B stages that test them. B1 is descriptive and validates the measurement stack; it cannot establish H-B1 or H-B2 because the stored Cycle A blocks combine SA and FF and all have depth four.
+
+\section{Cycle C---learnability and conditional-computation preregistration}
+Cycle C preserves all Cycle A/B results and moves the empirical question beyond an inhibition-only framing: how does a neural system allocate the strength, location, type, and depth of computation as task demands change? The registered hierarchy separates dense candidate transformations, soft amplitude control, hard execution selection, and conditional assembly through depth and expert routing. A small soft gate is not a binary route, and neither implies avoided FLOPs unless execution is actually bypassed.
+
+The first stage holds architecture, data, optimizer, schedule, seeds, steps, and training tokens fixed while comparing dense residuals, static learned layer scales, dynamic block gates, and separate SA/FF gates. Learning-curve AUC and steps/tokens/wall time to competence are primary; final accuracy is insufficient. Later stages independently vary task difficulty and minimum depth, sparsity pressure, Mixture-of-Depths, projected head contributions, and a controlled MoD--MoE factorial before expanding the pretrained task ecology. Ordinary Qwen and small Llama/Gemma residual science is not blocked on the larger gated-Qwen checkpoint; that checkpoint remains a separate resource-conditional test.
+
+The prospective Cycle C hypotheses are that dynamic conditioning can improve learning speed beyond static scaling on some regimes; explicit sparsity pressure can produce a quality--active-compute frontier; MoD more directly changes executed depth than soft gates; MoD and MoE can provide complementary routing axes; projected head writes reveal organization hidden by attention matrices; and router decisions encode causal utility beyond update magnitude only under the strong computational-selection interpretation. Nulls are retained, including static scaling matching dynamic gates, monotonic quality loss under sparsity, or no utility information beyond magnitude.
 
 \section{Staged experimental protocol}
 \subsection{Core E1: baseline residual map}
@@ -546,6 +553,38 @@ B8 evaluated only its upstream eligibility rule. Standard-Qwen parity was valid,
 \subsection{B9: conditional Gemma-family stop}
 B9 required both an end-to-end Qwen comparison and a completed Llama replication. Neither prerequisite was available: B7 lacked real gated-checkpoint parity and B8 contained only its eligibility decision. B9 therefore selected and downloaded no Gemma checkpoint, ran zero forwards, and produced no Gemma or cross-family metrics. As with B8, this is a documented upstream stop rather than an architecture-family result.
 
+\section{Cycle C---Learnability and Computational Allocation}
+\subsection{C1: fixed-budget learning curves}
+C1 trained 20 depth-16, width-64 models: dense residual, static learned layer scale, dynamic sigmoid block gate, and separate sigmoid SA/FF gates, each at seeds 11, 22, 33, 44, and 55. Every run used the same five-task B5 ecology, data order by paired seed, AdamW settings, batch size, 24 epochs, 456 optimizer steps, and 924,168 non-padding training tokens. The static scale is an unconstrained layer scalar initialized at exactly one; a shared-weight test confirms exact step-zero parity with the dense model. Dynamic gates retain the B6 sigmoid parameterization initialized at $\sigma(2)$. Validation was measured every ten steps, the frozen test split was evaluated only after the fixed final state, and all threshold failures remain explicit nulls.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+Variant & Curve AUC & Paired $\Delta$ AUC & Test accuracy & Steps to 90\% & Steps to 99\% \\
+\midrule
+Dense & .782 [.770,.795] & --- & .992 [.990,.995] & 186 & 226 (5/5) \\
+Static scale & .782 [.770,.795] & .0004 [-.0012,.0020] & .991 [.989,.993] & 184 & 236 (5/5) \\
+Block gate & .780 [.764,.794] & -.0024 [-.0082,.0063] & .991 [.987,.993] & 190 & 235 (4/5) \\
+SA/FF gates & .785 [.773,.798] & .0034 [-.0020,.0093] & .993 [.991,.995] & 186 & 212 (5/5) \\
+\bottomrule
+\end{tabular}
+\caption{C1 five-seed fixed-budget results. Intervals are seed-bootstrap 95\% intervals; AUC differences are paired by seed. The block-gate 99\% mean is conditional on the four seeds that reached the threshold.}
+\end{table}
+
+No dynamic variant reliably improved learning-curve AUC over dense residuals, and static scaling was indistinguishable from both at this resolution. Mean steps to 80/90/95\% competence were respectively 174/186/192 for dense, 172/184/192 for static scale, 176/190/200 for the block gate, and 172/186/192 for separate SA/FF gates. At 99\%, the apparent SA/FF advantage is not a registered paired effect and terminal accuracy is saturated; one block-gate seed never crossed 99\% validation accuracy. Rounded mean non-padding tokens to 90\% were 377k, 373k, 385k, and 377k in the same order. Mean wall time to 90\% was 40.5, 38.8, 41.1, and 45.3 seconds, although these timings include validation and diagnostic capture and are not pure throughput benchmarks.
+
+The optimization diagnostics show real amplitude changes without a learnability result. Mean gradient norms were .665 dense, .664 static, .647 block-gated, and .610 SA/FF-gated; mean parameter-update norms were .110, .108, .109, and .104. Final candidate/effective residual-update norms were 3.91/3.91, 3.92/3.97, 4.15/3.39, and 4.06/3.27. Corresponding mean applied multipliers were 1.000, 1.010, .805, and .762. Thus learned gates substantially attenuate candidate writes, but C1 does not show that this allocation improves optimization or final capacity under the easy, high-identifiability regime.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.98\linewidth]{../../../artifacts/cycle_c/c1_learning_curves/figures/c1_learning_curves.pdf}
+\caption{C1 validation learning curves against fixed non-padding token exposure, five-seed AUC distributions, and saturated frozen-test accuracy. Shading spans the observed seed range; no dynamic-gate paired AUC interval excludes zero.}
+\end{figure}
+
+C1 therefore preserves the null that final accuracy alone cannot justify gating and adds a stronger learnability null under matched training exposure. It does not establish that dynamic conditioning is useless: task difficulty and minimum necessary depth were held fixed at a regime that all variants mastered. C2 consequently tests whether any optimization or effective-capacity distinction emerges as difficulty rises or depth becomes limiting, without changing the C1 result after seeing that sweep.
+
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.
 
@@ -575,6 +614,8 @@ The present design cannot fully remove training-history confounds in pretrained 
 Cycle A answers its bounded causal question with a constrained null. On tasks the tiny decoders learned, all four residual blocks contributed positive causal probability utility, while the only negative cell belonged to a chance-level task and lacked repair. Competence-matched counterfactual goals did not yield replicated utility changes. Scalar gates remained nearly open, neither gated variant improved quality or selected independently useful computation, and the explicit goal latent failed the stronger future-utility test against ordinary residual summaries.
 
 Cycle B1--B9 expands what is known without rewriting that null. The residual carrier changes more smoothly across depth than candidate writes, exact SA/FF intervention shows causal asymmetry, and B3 finds no joint repair. B4 adds localized negative and near-zero sublayers but fails the strict slack criterion. B5 supplies the missing competence control: five tasks and all ten pairs match, 13 task-conditioned utility contrasts replicate, and minimum layer 8 has negative block/FF utility. B6 shows that deep learned gates are functionally consequential under forced-open and shuffled interventions, unlike Cycle A's saturated gates. However, native quality merely matches baseline, gate--utility alignment is weaker than gate--magnitude alignment, the negative cell persists, and no candidate computation is skipped. B7 validates exact real-model instrumentation and reproduces SA/FF causal asymmetry in standard Qwen3-0.6B, but the matched gated checkpoint remains unevaluated under an explicit resource stop. B8 and B9 consequently record conditional Llama and Gemma stops with zero models or examples. The combined result supports task-conditioned residual dynamics, soft amplitude modulation, and portable measurement semantics, not repair, strong interference, a quality--compute benefit, or gated/cross-family transfer.
+
+Cycle C1 asks a different question of that same mechanism: whether amplitude allocation changes how efficiently competence is learned. Across 20 fixed-budget runs, static and dynamic controls all reached essentially the same saturated final quality. Separate SA/FF gates had the largest AUC point estimate, but its paired interval included zero; whole-block gating was slightly slower on average and also inconclusive. Gates reduced effective relative to candidate update norms, yet did not reliably improve AUC, threshold steps, tokens, or wall time. The next evidential boundary is therefore difficulty and minimum depth, not a post-hoc claim that gating wins on the C1 ecology.
 
 \begin{thebibliography}{9}
 \bibitem{kornblith2019cka}

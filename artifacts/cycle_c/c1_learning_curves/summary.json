@@ -1,0 +1,33 @@
+{
+  "cycle": "C",
+  "experiment": "C1",
+  "revision": 1,
+  "source_commit": "de138cd4376eda44c92edfd3578cb3d9a9e62d5f",
+  "runs": 20,
+  "fixed_steps_per_run": 456,
+  "fixed_tokens_per_run": [
+    924168
+  ],
+  "learning_curve_points": 940,
+  "auc_by_variant": {
+    "baseline": 0.7819522023200989,
+    "gated": 0.7795664072036743,
+    "sa_ff_gated": 0.7853679060935974,
+    "static_scale": 0.782342791557312
+  },
+  "final_test_accuracy_by_variant": {
+    "baseline": 0.9919999837875366,
+    "gated": 0.9906666874885559,
+    "sa_ff_gated": 0.9926666021347046,
+    "static_scale": 0.9906666874885559
+  },
+  "paired_auc_minus_baseline": {
+    "static_scale": 0.00039065806777216494,
+    "gated": -0.002385769272223115,
+    "sa_ff_gated": 0.0034157559275627136
+  },
+  "training_seconds_sum": 2010.9259265998844,
+  "stage_wall_seconds": null,
+  "postprocess_only": true,
+  "interpretation": "Learnability is assessed at a fixed optimization and token budget; terminal accuracy alone is not sufficient evidence."
+}

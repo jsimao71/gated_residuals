@@ -1,0 +1,20 @@
+{
+  "cycle": "C",
+  "experiment": "C1",
+  "revision": 1,
+  "run_id": "gated-seed-22",
+  "variant": "gated",
+  "seed": 22,
+  "depth": 16,
+  "width": 64,
+  "parameters": 550362,
+  "training_steps": 456,
+  "tokens_seen": 924168,
+  "training_seconds": 97.06294089998119,
+  "final_val_loss": 0.04598901708920797,
+  "final_val_accuracy": 0.98,
+  "final_test_loss": 0.08253880977630615,
+  "final_test_accuracy": 0.9833333333333333,
+  "checkpoint": "artifacts/cycle_c/c1_learning_curves/runs/gated/seed-22/model.pt",
+  "device": "cuda"
+}

@@ -45,6 +45,11 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
 - B9 recorded the downstream Gemma-family stop. With B7 incomplete end to end and B8 containing no
   model result, no Gemma checkpoint or cross-family metric was permitted. Cycle B1--B9 is fully
   accounted for, including its conditional stops.
+- Cycle C reframes Paper 1 around learnability and task-conditioned allocation. C1 completed a
+  four-variant, five-seed fixed-budget comparison. Static scales and dynamic gates did not reliably
+  change learning-curve AUC or saturated final accuracy versus dense residuals, despite clear
+  attenuation of effective updates. C2 will test whether the null changes with task difficulty or
+  minimum required depth.
 
 ## Proposed series
 
@@ -120,9 +125,10 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Retain B7's standard-Qwen atlas as a real-checkpoint adapter validation, not a gated comparison.
-2. Run the pinned baseline/headwise release only on hardware with enough headroom to complete real
-   native parity and interventions.
-3. Keep the recorded B8/B9 stops closed until the Qwen path works end to end; then resume in order.
-4. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
-5. Keep Papers 2--5 evidence-conditional; Cycle A through B7 do not support expanding their claims.
+1. Run Cycle C2 difficulty and minimum-depth sweeps without revising the fixed C1 null.
+2. Continue to sparsity pressure and hard depth routing only after their instrumentation tests pass.
+3. Retain B7's standard-Qwen atlas as a real-checkpoint adapter validation, not a gated comparison.
+4. Run the pinned gated release only on hardware with enough headroom; do not block ordinary Qwen,
+   Llama, or Gemma residual science on that resource condition.
+5. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
+6. Keep Papers 2--5 evidence-conditional until their dedicated evidence gates are satisfied.

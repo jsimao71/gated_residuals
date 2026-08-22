@@ -95,7 +95,16 @@ class TinyResidualDecoder(nn.Module):
         goal_width: int = 24,
     ):
         super().__init__()
-        if variant not in {"baseline", "matched_baseline", "gated", "sa_ff_gated", "goal", "goal_only", "goal_gated"}:
+        if variant not in {
+            "baseline",
+            "matched_baseline",
+            "static_scale",
+            "gated",
+            "sa_ff_gated",
+            "goal",
+            "goal_only",
+            "goal_gated",
+        }:
             raise ValueError(f"unknown tiny-model variant: {variant}")
         self.variant = variant
         self.width = width
@@ -109,6 +118,10 @@ class TinyResidualDecoder(nn.Module):
         self.output = nn.Linear(width, vocab_size)
         self.has_goal = variant in {"goal", "goal_only", "goal_gated"}
         self.has_gate = variant in {"gated", "goal_gated"}
+        self.has_static_scale = variant == "static_scale"
+        if self.has_static_scale:
+            # Identity initialization makes this an exact dense-model control at step zero.
+            self.layer_scales = nn.Parameter(torch.ones(layers))
         if self.has_goal:
             self.goal_initial = nn.Parameter(torch.zeros(goal_width))
             self.goal_updates = nn.ModuleList(
@@ -237,6 +250,8 @@ class TinyResidualDecoder(nn.Module):
                 elif self.variant == "goal_gated" and goal_mode == "zero":
                     gate_source = torch.zeros_like(gate_source)
                 gate = torch.sigmoid(self.gates[layer_index](gate_source))
+            elif self.has_static_scale:
+                gate = self.layer_scales[layer_index].expand(state.size(0), 1)
             else:
                 gate = torch.ones((state.size(0), 1), device=state.device, dtype=state.dtype)
             if gate_mode == "open":

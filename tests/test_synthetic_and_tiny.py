@@ -158,6 +158,25 @@ def test_sa_ff_gated_forced_open_matches_baseline_with_shared_weights():
     assert all(torch.equal(gate, torch.ones_like(gate)) for gate in observed.ff_gates)
 
 
+def test_static_scale_starts_as_exact_baseline_and_is_example_independent():
+    baseline = TinyResidualDecoder(32, width=16, layers=3, heads=4, max_length=8)
+    scaled = TinyResidualDecoder(
+        32, width=16, layers=3, heads=4, max_length=8, variant="static_scale"
+    )
+    shared = {name: value for name, value in baseline.state_dict().items() if name in scaled.state_dict()}
+    scaled.load_state_dict(shared, strict=False)
+    ids = torch.randint(1, 32, (3, 6), generator=torch.Generator().manual_seed(29))
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    expected = baseline(ids, mask).logits
+    observed = scaled(ids, mask, capture=True)
+    torch.testing.assert_close(expected, observed.logits, rtol=0, atol=0)
+    assert all(torch.equal(gate, torch.ones_like(gate)) for gate in observed.gates)
+    with torch.no_grad():
+        scaled.layer_scales[1] = 0.25
+    changed = scaled(ids, mask, capture=True)
+    torch.testing.assert_close(changed.gates[1], torch.full((3, 1), 0.25))
+
+
 def test_gate_override_can_close_one_layer_without_changing_other_shapes():
     model = TinyResidualDecoder(32, width=16, layers=2, heads=4, max_length=8, variant="gated")
     ids = torch.randint(1, 32, (2, 6))
