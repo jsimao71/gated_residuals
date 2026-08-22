@@ -176,6 +176,10 @@ instrumentation smoke run.
   headwise gated release still could not fit measured RAM/VRAM headroom, so it has zero evaluated
   examples and no gate result. Artifacts are under `artifacts/cycle_b/b7_qwen`. B8/B9 remain closed
   because the matched Qwen comparison did not complete end to end.
+- **B8 conditional stop complete**: the Llama-family stage checked the persisted B7 decision and
+  did not select, download, or evaluate a checkpoint because real gated-Qwen parity and the
+  reserve-aware resource gate both failed. This is not a Llama result. Decision artifacts are
+  under `artifacts/cycle_b/b8_llama`.
 
 ## Released gated-attention comparison
 

@@ -1,0 +1,2 @@
+cycle,experiment,revision,status,intended_model_family,standard_qwen_real_parity,gated_qwen_real_parity,gated_qwen_resource_eligible,b7_end_to_end,eligible,checkpoint_selected,models_downloaded,models_evaluated,examples_evaluated,metrics_available,decision
+B,B8,1,not_run_upstream_qwen_gate_closed,Llama,True,False,False,False,False,False,0,0,0,False,do_not_select_or_download_llama_checkpoint_until_b7_works_end_to_end

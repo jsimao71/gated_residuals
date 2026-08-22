@@ -40,6 +40,8 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   results showed positive mean SA/block utility at every layer and no confidence-supported negative
   FF layer. The exact pinned gated release remained outside measured memory headroom, so no gated
   examples or gate metrics exist and the conditional B8/B9 gate remains closed.
+- B8 recorded its conditional Llama-family stop: no checkpoint selection, download, model forward,
+  or metric collection was permitted because B7 did not complete the exact gated comparison.
 
 ## Proposed series
 

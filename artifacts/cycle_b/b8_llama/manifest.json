@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "scripts/run_b8.py"
+  ],
+  "config": {
+    "checkpoint_selection": "deferred_until_gate_opens",
+    "cycle": "B",
+    "description": "Conditional Llama-family replication gate after B7.",
+    "eligibility": {
+      "require_manageable_resource_use": true,
+      "require_qwen_end_to_end": true,
+      "require_real_gated_checkpoint_parity": true
+    },
+    "experiment": "B8",
+    "intended_model_family": "Llama",
+    "output": {
+      "directory": "artifacts/cycle_b/b8_llama"
+    },
+    "revision": 1,
+    "upstream_summary": "artifacts/cycle_b/b7_qwen/summary.json"
+  },
+  "metadata": {
+    "batch_size": null,
+    "commit_hash": "23a04ec2f8d26b81f0a40050537b880c1d7631b3",
+    "context_length": null,
+    "dataset": "none",
+    "dataset_revision": null,
+    "device": "not_allocated",
+    "dtype": null,
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {},
+    "intervention": "none",
+    "model": "not_selected",
+    "model_revision": null,
+    "model_variant": "llama_conditional_stop",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "cycle-b-b8-eligibility",
+    "seed": 0,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

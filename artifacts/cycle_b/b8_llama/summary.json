@@ -1,0 +1,18 @@
+{
+  "cycle": "B",
+  "experiment": "B8",
+  "revision": 1,
+  "status": "not_run_upstream_qwen_gate_closed",
+  "intended_model_family": "Llama",
+  "standard_qwen_real_parity": true,
+  "gated_qwen_real_parity": false,
+  "gated_qwen_resource_eligible": false,
+  "b7_end_to_end": false,
+  "eligible": false,
+  "checkpoint_selected": false,
+  "models_downloaded": 0,
+  "models_evaluated": 0,
+  "examples_evaluated": 0,
+  "metrics_available": false,
+  "decision": "do_not_select_or_download_llama_checkpoint_until_b7_works_end_to_end"
+}

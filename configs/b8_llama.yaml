@@ -1,0 +1,13 @@
+cycle: B
+experiment: B8
+revision: 1
+description: Conditional Llama-family replication gate after B7.
+upstream_summary: artifacts/cycle_b/b7_qwen/summary.json
+eligibility:
+  require_qwen_end_to_end: true
+  require_real_gated_checkpoint_parity: true
+  require_manageable_resource_use: true
+intended_model_family: Llama
+checkpoint_selection: deferred_until_gate_opens
+output:
+  directory: artifacts/cycle_b/b8_llama
