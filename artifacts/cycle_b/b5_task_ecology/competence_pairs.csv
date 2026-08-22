@@ -1,0 +1,11 @@
+accuracy_left,accuracy_right,competence_matched,mean_absolute_seed_difference,seed_n,task_left,task_right,within_delta_seed_count
+0.9800000000000001,0.9799999999999999,True,0.013333333333333308,5,maximum,minimum,5
+0.9800000000000001,1.0,True,0.020000000000000018,5,maximum,first,5
+0.9800000000000001,1.0,True,0.020000000000000018,5,maximum,middle,5
+0.9800000000000001,1.0,True,0.020000000000000018,5,maximum,last,5
+0.9799999999999999,1.0,True,0.02000000000000004,5,minimum,first,5
+0.9799999999999999,1.0,True,0.02000000000000004,5,minimum,middle,5
+0.9799999999999999,1.0,True,0.02000000000000004,5,minimum,last,5
+1.0,1.0,True,0.0,5,first,middle,5
+1.0,1.0,True,0.0,5,first,last,5
+1.0,1.0,True,0.0,5,middle,last,5

@@ -35,6 +35,27 @@ def test_task_subset_preserves_counterfactual_content_matching():
     assert len(splits["test"]) == 4
 
 
+def test_expanded_selection_ecology_answers_are_deterministic():
+    intents = ["first", "middle", "last", "argmax_position", "argmin_position"]
+    config = {"data": {**CONFIG["data"], "intents": intents}}
+    examples = build_splits(config)["test"]
+    family = examples[: len(intents)]
+    content = family[0].content
+    answers = {example.intent: example.answer for example in family}
+    assert answers["first"] == ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[content[0]]
+    assert answers["middle"] == ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[content[1]]
+    assert answers["last"] == ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[content[2]]
+    assert answers["argmax_position"] in {"first", "second", "third"}
+    assert answers["argmin_position"] in {"first", "second", "third"}
+
+
+def test_identifiability_subset_controls_task_wording():
+    config = {"data": {**CONFIG["data"], "intents": ["maximum", "first"], "identifiability_levels": ["high"]}}
+    examples = build_splits(config)["train"]
+    assert {example.identifiability for example in examples} == {"high"}
+    assert all(example.goal_identifiability == 1.0 for example in examples)
+
+
 def test_tiny_model_capture_and_skip_parity():
     model = TinyResidualDecoder(32, width=16, layers=3, heads=4, max_length=8)
     ids = torch.randint(1, 32, (2, 6))

@@ -1,0 +1,25 @@
+{
+  "cycle": "B",
+  "experiment": "B5",
+  "revision": 3,
+  "source_commit": "d6c51fbbc778b2a94b3ccea1ea6aace8dfddbd30",
+  "runs": 5,
+  "tasks": 5,
+  "causal_rows": 24000,
+  "quality_rows": 1500,
+  "goal_map_rows": 6400,
+  "native_capture_max_logit_error": 0.0,
+  "competent_tasks": [
+    "first",
+    "last",
+    "maximum",
+    "middle",
+    "minimum"
+  ],
+  "competence_matched_pairs": 10,
+  "replicated_task_conditioned_utility_cells": 13,
+  "goal_probe_final_layer_accuracy": 0.3440000057220459,
+  "b6_gate_open_from_b5": true,
+  "elapsed_seconds": 582.6071636998095,
+  "interpretation": "Only competence-matched pairs enter task-conditioned utility contrasts; goal divergence and attention redistribution remain descriptive."
+}

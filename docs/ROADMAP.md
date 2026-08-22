@@ -28,6 +28,10 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   strict competence-preservation rule; two competent-task FF cells were reliably negative and one
   late SA cell was reliably near zero. This conditionally opens B6 after B5 ecology validation,
   without supporting repair or strong interference.
+- B5 completed a five-task, five-seed, competence-matched ecology after documented validation
+  pilots. All ten task pairs matched; 13 task-conditioned block/SA utility contrasts replicated,
+  and minimum layer 8 had negative block/FF utility. B6 is evidence-enabled, while repair and
+  strong interference remain unsupported.
 
 ## Proposed series
 
@@ -103,9 +107,9 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
-2. Test whether B4's localized negative/near-zero sublayer cells generalize across matched tasks.
-3. Run B6 only on evidence-selected conditions if the Cycle B trigger remains valid after B5.
+1. Run B6 on the evidence-selected 16-layer condition with block and SA/FF gate controls.
+2. Test whether learned gate values align with B5 causal utility rather than update magnitude alone.
+3. Retain the no-repair boundary unless a new joint vector-plus-task recovery result replicates.
 4. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
    extend the same adapter semantics to Llama and Gemma if resource use is manageable.
-5. Keep Papers 2--5 evidence-conditional; Cycle A through B4 do not support expanding their claims.
+5. Keep Papers 2--5 evidence-conditional; Cycle A through B5 do not support expanding their claims.

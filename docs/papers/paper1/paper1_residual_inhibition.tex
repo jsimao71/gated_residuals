@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- Cycle A and Cycle B1--B4 results, August 2026}
+\date{Paper 1 research draft --- Cycle A and Cycle B1--B5 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair, so strong interference was not supported. Matched scalar gates saturated near open and did not improve quality, and an explicit goal latent underperformed pooled ordinary residuals for predicting future utility. Cycle B1 computed an exhaustive residual atlas over all 30 stored Cycle A checkpoints. B2 separated self-attention (SA) and feed-forward (FF) writes with exact native parity: SA had greater causal utility in seven of eight learned-task/layer cells, while both sublayers were positively useful. B3 measured token/depth stationarity and 12,150 intervention trajectories; no perturbation showed both vector recovery and task-gap recovery. B4 then trained 25 controlled depth/capacity runs. At width 64, mean accuracy rose from .890 at depth 4 to .948 at depth 16 while the crude effective-block fraction fell from 1.00 to .775, but the registered all-condition competence criterion failed. Two minimum-task FF cells nevertheless had replicated negative utility, one late SA cell was reliably near zero, and no joint repair appeared. These results motivate task-ecology validation and conditionally reopen gating without establishing interference or competence-preserving depth slack.
+Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair. Gates saturated near open and did not improve quality. Cycle B1 computed an exhaustive residual atlas; B2 separated self-attention (SA) and feed-forward (FF) writes; and B3 found no joint vector-plus-task repair in 12,150 trajectories. B4 trained 25 depth/capacity runs. At width 64, mean accuracy rose from .890 at depth 4 to .948 at depth 16 while crude effective-block fraction fell from 1.00 to .775, but the strict competence criterion failed. B5 repaired the task ecology using five high-identifiability value-selection goals. All five tasks were competent, all ten pairs were matched, and 13 pair/layer/component utility contrasts replicated; minimum layer 8 also had negative block and FF utility. Ordinary-residual goal decodability peaked mid-depth then declined. These results establish competence-matched task-conditioned computation and justify a targeted B6 gating test, while repair, strong interference, and competence-preserving depth slack remain unsupported.
 \end{abstract}
 
 \section{Scientific objective}
@@ -486,6 +486,28 @@ The causal decomposition did expose localized selection pressure. Minimum-task F
 
 B4 therefore supplies the first competent-task negative-sublayer and near-zero-sublayer candidates in this line, satisfying a Cycle B6 evidence trigger without supplying the repair required for an interference claim. Execution order is unchanged: B5 must first test whether these effects survive a larger, explicitly competence-matched goal ecology; B6 gating may then proceed against the evidence-selected deep conditions.
 
+\subsection{B5: expanded competence-matched task ecology}
+B5 began with validation-only difficulty control. A seven-task one-seed pilot excluded argmax-position and argmin-position at .567 and .583 validation accuracy. A five-task pilot retaining mixed high/medium/low instruction paraphrases still produced validation task means from .813 to .917 and no competence-matched pair. Confirmatory revision 3 therefore fixed direct high-identifiability wording for maximum, minimum, first, middle, and last. Pilot checkpoints remain audit artifacts, while their frozen-test measurements are excluded from all claims.
+
+The confirmatory 16-layer width-64 baseline used five new seeds and exact native/capture parity. Held-out accuracies were 1.00 for first, middle, and last and .98 for maximum and minimum; every task cleared .90 in at least four seeds. All ten task pairs met the registered $|Q_i-Q_j|<.05$ rule in at least four seeds. B5 collected 24,000 example--layer causal records, 6,400 seed/pair/layer/token-bin goal-divergence cells, final-query attention redistribution, and validation-fit residual goal probes.
+
+Thirteen competence-matched task-pair/layer/component contrasts passed the $|\Delta U|>.01$, four-of-five-seed, seed-bootstrap rule. They occupy seven pair--layer rows and comprise seven block and six SA contrasts; none is an FF contrast. For the original maximum--minimum pair at layer 4, maximum had lower utility by $-.126$ at block level (95\% interval $[-.233,-.013]$) and $-.114$ for SA ($[-.214,-.014]$). Other replicated contrasts involved maximum--last at layer 1, maximum--middle at layer 3, and minimum versus first/middle/last at layers 1 or 4. Thus goal-conditioned causal roles emerge early in a competent ecology rather than from comparing learned and failed tasks.
+
+B5 also replicated localized negative computation for minimum at layer 8:
+\begin{align*}
+U^{\mathrm{block}}_8&=-.0161, & \mathrm{CI}_{95}&=[-.0277,-.0028],\\
+U^{\mathrm{FF}}_8&=-.0105, & \mathrm{CI}_{95}&=[-.0150,-.0057].
+\end{align*}
+At least four seed means were below $-.002$. This is reliable harmful-under-ablation utility language, not strong interference: B5 does not add a replicated repair result. The validation-fit nearest-centroid linear goal probe rose from .265 at layer 0 to .739 at layer 5, then declined to .344 at layer 15 (chance .20). This supports goal information in the ordinary residual stream, not a separate causal controller; instruction wording and answer structure can both contribute to decodability.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\linewidth]{../../../artifacts/cycle_b/b5_task_ecology/figures/b5_ecology.pdf}
+\caption{B5 confirmatory task competence and block-utility profiles in the 16-layer model. Only pairwise contrasts passing the independent competence rule enter task-conditioned claims.}
+\end{figure}
+
+B5 confirms H-B3 and keeps the B6 gate open on two independent triggers: competence-matched task-conditioned utility and replicated negative minimum-task block/FF utility. B6 should target the evidence-selected deep condition and compare whether learned gates track or mitigate these causal effects; it is not licensed to claim repair or general interference.
+
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.
 
@@ -514,7 +536,7 @@ The present design cannot fully remove training-history confounds in pretrained 
 \section{Conclusion}
 Cycle A answers its bounded causal question with a constrained null. On tasks the tiny decoders learned, all four residual blocks contributed positive causal probability utility, while the only negative cell belonged to a chance-level task and lacked repair. Competence-matched counterfactual goals did not yield replicated utility changes. Scalar gates remained nearly open, neither gated variant improved quality or selected independently useful computation, and the explicit goal latent failed the stronger future-utility test against ordinary residual summaries.
 
-Cycle B1--B4 expands what is known without rewriting that null. Across all stored Cycle A models, the residual carrier changes more smoothly across depth than the candidate writes, and early anti-alignment coexists with positive learned-task utility. Exact SA/FF intervention shows a shallow causal asymmetry, while B3 finds no joint repair. B4's deeper models add localized evidence for selection pressure: two minimum-task FF cells have replicated negative utility and one late SA cell is reliably near zero. Yet no B4 perturbation repairs jointly, the strict all-condition competence rule fails, and the matched-parameter narrow/deep control underperforms. The results therefore reopen conditional gating but do not establish interference or depth slack. B5 must determine whether task-conditioned roles replicate under a larger competence-matched ecology before B6 tests evidence-selected gates; pretrained B7--B9 remain architecture- and resource-gated.
+Cycle B1--B5 expands what is known without rewriting that null. The residual carrier changes more smoothly across depth than candidate writes, exact SA/FF intervention shows a shallow causal asymmetry, and B3 finds no joint repair. B4's deeper models add localized negative and near-zero sublayers but fail the strict all-condition slack criterion. B5 supplies the missing competence control: five tasks and all ten pairs are matched, 13 task-conditioned utility contrasts replicate, and minimum layer 8 has negative block and FF utility. Ordinary-residual goal decodability peaks mid-depth, consistent with distributed goal information but not a distinct controller. These results support task-conditioned residual computation and justify targeted B6 gating; they still do not establish repair, strong interference, or a quality--compute benefit. Pretrained B7--B9 remain architecture- and resource-gated.
 
 \begin{thebibliography}{9}
 \bibitem{kornblith2019cka}

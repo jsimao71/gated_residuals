@@ -1,0 +1,6 @@
+accuracy_ci95_high,accuracy_ci95_low,accuracy_mean,competent,competent_seed_count,seed_n,task_family
+1.0,1.0,1.0,True,5,5,first
+1.0,1.0,1.0,True,5,5,last
+0.9899999499320984,0.9699999690055847,0.9799998998641968,True,5,5,maximum
+1.0,1.0,1.0,True,5,5,middle
+0.98333340883255,0.9733333587646484,0.9800000190734863,True,5,5,minimum

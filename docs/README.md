@@ -15,8 +15,8 @@ Cycle B now extends that fixed first-cycle baseline. B1 ran the exhaustive resid
 30 stored Cycle A checkpoints before new training. B2 is also complete: self-attention and
 feed-forward writes are captured at distinct pre-norm locations and intervened on separately with
 exact native parity. B3's stability and amplification--repair atlas is complete, and B4 completed
-the five-condition depth/capacity sweep. Task-ecology, gating, and pretrained stages remain
-evidence and instrumentation gated.
+the five-condition depth/capacity sweep. B5 now supplies a competence-matched five-task ecology.
+Gating and pretrained stages remain evidence and instrumentation gated.
 
 Start with:
 
@@ -109,6 +109,7 @@ PYTHONPATH=src python scripts/run_b1.py
 PYTHONPATH=src python scripts/run_b2.py
 PYTHONPATH=src python scripts/run_b3.py
 PYTHONPATH=src python scripts/run_b4.py
+PYTHONPATH=src python scripts/run_b5.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -144,17 +145,23 @@ instrumentation smoke run.
   replicated. Artifacts are under `artifacts/cycle_b/b2_sa_ff`.
 - **B3 complete**: 5,400 stability records and 12,150 intervention trajectories. Twenty-three
   exploratory correct/incorrect cells replicated and concentrated in late FF statistics, but no
-  perturbation showed both vector recovery and task-gap recovery. H-B4 remains unconfirmed and the
-  B6 gating gate stays closed. Artifacts are under `artifacts/cycle_b/b3_stability`.
+  perturbation showed both vector recovery and task-gap recovery. H-B4 remained unconfirmed and the
+  B6 gating gate stayed closed at this stage. Artifacts are under `artifacts/cycle_b/b3_stability`.
 - **B4 complete**: 25 runs across depths 4/8/12/16 plus a 16-layer width-32 matched-parameter
   control, with 50,400 causal records and exact capture parity. Width-64 accuracy rose from 0.890
   to 0.948 while effective-block fraction fell from 1.000 to 0.775, but the registered strict
   competence gate failed, so this is not claimed as competence-preserving depth slack. Two
   minimum-task FF cells had replicated negative utility, one late SA cell was reliably near zero,
-  and joint repair remained absent. This opens a B6 evidence trigger, subject to B5 ecology
-  validation. Artifacts are under `artifacts/cycle_b/b4_depth_sweep`.
-- **B5 next**: freeze and train the expanded competence-matched task ecology before using the B4
-  candidates to select B6 conditions.
+  and joint repair remained absent. This opened a B6 evidence trigger subsequently validated by
+  B5. Artifacts are under `artifacts/cycle_b/b4_depth_sweep`.
+- **B5 complete**: after validation-only task/difficulty pilots, the confirmatory five-task ecology
+  reached 0.98--1.00 accuracy and all ten task pairs were competence matched. Thirteen block/SA
+  utility contrasts replicated across seven pair--layer rows. Minimum layer 8 had negative block
+  and FF utility, while ordinary-residual goal-probe accuracy peaked at 0.739 mid-depth (chance
+  0.20). B6 is now enabled by task-conditioned and negative-utility evidence, not by repair.
+  Artifacts are under `artifacts/cycle_b/b5_task_ecology`.
+- **B6 next**: test input-conditioned block and optional SA/FF gates on the evidence-selected deep
+  condition, including forced-open/closed/shuffled controls and gate--utility alignment.
 
 ## Released gated-attention comparison
 

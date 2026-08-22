@@ -1,0 +1,6 @@
+best_val_loss,checkpoint,cycle,depth,device,experiment,model_family,model_variant,native_capture_max_logit_error,parameters,revision,run_id,seed,task_family,test_examples,training_seconds,width
+0.008479207853476207,artifacts/cycle_b/b5_task_ecology/runs/seed-11/model.pt,B,16,cuda,B5,tiny_custom_transformer,baseline,0.0,549322,3,depth16-width64-seed-11,11,maximum+minimum+first+middle+last,300,65.46086669992656,64
+0.015273567537466686,artifacts/cycle_b/b5_task_ecology/runs/seed-22/model.pt,B,16,cuda,B5,tiny_custom_transformer,baseline,0.0,549322,3,depth16-width64-seed-22,22,maximum+minimum+first+middle+last,300,63.780546699883416,64
+0.02011452948053678,artifacts/cycle_b/b5_task_ecology/runs/seed-33/model.pt,B,16,cuda,B5,tiny_custom_transformer,baseline,0.0,549322,3,depth16-width64-seed-33,33,maximum+minimum+first+middle+last,300,63.54569089994766,64
+0.013715640107790628,artifacts/cycle_b/b5_task_ecology/runs/seed-44/model.pt,B,16,cuda,B5,tiny_custom_transformer,baseline,0.0,549322,3,depth16-width64-seed-44,44,maximum+minimum+first+middle+last,300,63.678198399953544,64
+0.005218330224355062,artifacts/cycle_b/b5_task_ecology/runs/seed-55/model.pt,B,16,cuda,B5,tiny_custom_transformer,baseline,0.0,549322,3,depth16-width64-seed-55,55,maximum+minimum+first+middle+last,300,63.39884110004641,64

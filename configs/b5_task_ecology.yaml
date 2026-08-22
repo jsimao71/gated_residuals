@@ -1,0 +1,47 @@
+cycle: B
+experiment: B5
+revision: 3
+description: Expanded same-content value-selection ecology after validation-only task and wording adjustments.
+data:
+  generation_seed: 2718
+  train_families: 240
+  val_families: 60
+  test_families: 60
+  distractor_probability: 0.5
+  intents: [maximum, minimum, first, middle, last]
+  identifiability_levels: [high]
+  pilot_exclusions:
+    argmax_position: validation_accuracy_0.567_below_0.90
+    argmin_position: validation_accuracy_0.583_below_0.90
+  pilot_adjustments:
+    mixed_identifiability: validation_means_0.813_to_0.917_failed_seedwise_competence
+  max_length: 64
+model:
+  width: 64
+  layers: 16
+  heads: 4
+  mlp_ratio: 2
+  max_length: 64
+  dropout: 0.0
+  goal_width: 24
+training:
+  seeds: [11, 22, 33, 44, 55]
+  device: auto
+  epochs: 24
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_grad_norm: 1.0
+capture:
+  token_bins: 8
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  competence_accuracy: 0.90
+  competence_delta: 0.05
+  utility_difference: 0.01
+  negligible_utility: 0.002
+  minimum_seed_fraction: 0.8
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_b/b5_task_ecology

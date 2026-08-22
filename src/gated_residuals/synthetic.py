@@ -18,6 +18,10 @@ from torch.utils.data import Dataset
 
 NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
 INTENTS = ("maximum", "minimum", "sum_mod_10")
+EXPANDED_INTENTS = (
+    "maximum", "minimum", "sum_mod_10", "first", "middle", "last",
+    "argmax_position", "argmin_position",
+)
 IDENTIFIABILITY = ("high", "medium", "low")
 IDENTIFIABILITY_SCORE = {"high": 1.0, "medium": 0.5, "low": 0.0}
 
@@ -31,6 +35,21 @@ _GOAL_TEXT = {
     ("sum_mod_10", "high"): "Add the values and answer with the final digit of the sum.",
     ("sum_mod_10", "medium"): "Combine all values; only the units place is wanted.",
     ("sum_mod_10", "low"): "After one full group of ten is repeatedly removed, return what remains.",
+    ("first", "high"): "Return the first listed value.",
+    ("first", "medium"): "Choose the value that appears before the other two.",
+    ("first", "low"): "Read from left to right and return the leftmost item.",
+    ("middle", "high"): "Return the middle listed value.",
+    ("middle", "medium"): "Choose the value with one listed item on either side.",
+    ("middle", "low"): "Keep the original order and return the central item.",
+    ("last", "high"): "Return the last listed value.",
+    ("last", "medium"): "Choose the value that appears after the other two.",
+    ("last", "low"): "Read from left to right and return the rightmost item.",
+    ("argmax_position", "high"): "Return first, second, or third for the position of the largest value.",
+    ("argmax_position", "medium"): "Locate the greatest item and report its ordinal place.",
+    ("argmax_position", "low"): "Find the rightmost item after sorting by value, but report where it was originally.",
+    ("argmin_position", "high"): "Return first, second, or third for the position of the smallest value.",
+    ("argmin_position", "medium"): "Locate the least item and report its ordinal place.",
+    ("argmin_position", "low"): "Find the leftmost item after sorting by value, but report where it was originally.",
 }
 _PREFIXES = (
     "A short note contains these values:",
@@ -80,6 +99,16 @@ def _answer(content: tuple[int, int, int], intent: str) -> str:
         value = min(content)
     elif intent == "sum_mod_10":
         value = sum(content) % 10
+    elif intent == "first":
+        value = content[0]
+    elif intent == "middle":
+        value = content[1]
+    elif intent == "last":
+        value = content[2]
+    elif intent == "argmax_position":
+        return ("first", "second", "third")[content.index(max(content))]
+    elif intent == "argmin_position":
+        return ("first", "second", "third")[content.index(min(content))]
     else:
         raise ValueError(f"unknown intent: {intent}")
     return NUMBER_WORDS[value]
@@ -93,6 +122,7 @@ def generate_counterfactual_split(
     family_offset: int,
     distractor_probability: float = 0.5,
     intents: tuple[str, ...] = INTENTS,
+    identifiability_levels: tuple[str, ...] = IDENTIFIABILITY,
 ) -> list[CounterfactualExample]:
     """Generate content-disjoint families with every intent represented per content."""
     examples: list[CounterfactualExample] = []
@@ -101,7 +131,7 @@ def generate_counterfactual_split(
         family_id = f"family-{family_index:05d}"
         content = _content(seed, family_index)
         for intent_index, intent in enumerate(intents):
-            identifiability = IDENTIFIABILITY[(family_index + intent_index) % len(IDENTIFIABILITY)]
+            identifiability = identifiability_levels[(family_index + intent_index) % len(identifiability_levels)]
             rng = random.Random(_stable_seed(seed, split, family_index, intent))
             distractor = rng.random() < distractor_probability
             value_text = " ".join(NUMBER_WORDS[value] for value in content)
@@ -136,12 +166,15 @@ def build_splits(config: dict) -> dict[str, list[CounterfactualExample]]:
     train_n, val_n, test_n = (int(data[name]) for name in ("train_families", "val_families", "test_families"))
     probability = float(data.get("distractor_probability", 0.5))
     intents = tuple(data.get("intents", INTENTS))
-    if not intents or len(set(intents)) != len(intents) or not set(intents).issubset(INTENTS):
-        raise ValueError(f"data.intents must be a non-empty unique subset of {INTENTS}")
+    identifiability_levels = tuple(data.get("identifiability_levels", IDENTIFIABILITY))
+    if not intents or len(set(intents)) != len(intents) or not set(intents).issubset(EXPANDED_INTENTS):
+        raise ValueError(f"data.intents must be a non-empty unique subset of {EXPANDED_INTENTS}")
+    if not identifiability_levels or len(set(identifiability_levels)) != len(identifiability_levels) or not set(identifiability_levels).issubset(IDENTIFIABILITY):
+        raise ValueError(f"data.identifiability_levels must be a non-empty unique subset of {IDENTIFIABILITY}")
     return {
-        "train": generate_counterfactual_split("train", seed=seed, families=train_n, family_offset=0, distractor_probability=probability, intents=intents),
-        "val": generate_counterfactual_split("val", seed=seed, families=val_n, family_offset=train_n, distractor_probability=probability, intents=intents),
-        "test": generate_counterfactual_split("test", seed=seed, families=test_n, family_offset=train_n + val_n, distractor_probability=probability, intents=intents),
+        "train": generate_counterfactual_split("train", seed=seed, families=train_n, family_offset=0, distractor_probability=probability, intents=intents, identifiability_levels=identifiability_levels),
+        "val": generate_counterfactual_split("val", seed=seed, families=val_n, family_offset=train_n, distractor_probability=probability, intents=intents, identifiability_levels=identifiability_levels),
+        "test": generate_counterfactual_split("test", seed=seed, families=test_n, family_offset=train_n + val_n, distractor_probability=probability, intents=intents, identifiability_levels=identifiability_levels),
     }
 
 
