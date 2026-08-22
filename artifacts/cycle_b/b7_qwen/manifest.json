@@ -1,0 +1,75 @@
+{
+  "argv": [
+    "scripts/run_b7.py"
+  ],
+  "config": {
+    "cycle": "B",
+    "description": "Real small-Qwen residual replication plus an exact gated-release resource gate.",
+    "experiment": "B7",
+    "gated_release": {
+      "baseline_snapshot": "C:/Users/jsima/.cache/huggingface/hub/models--QwQZh--gated_attention/snapshots/aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b/1B_baseline",
+      "baseline_subfolder": "1B_baseline",
+      "gated_snapshot": "D:/hf-cache-gated-residuals/hub/models--QwQZh--gated_attention/snapshots/aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b/1B_gate_headwise",
+      "gated_subfolder": "1B_gate_headwise",
+      "implementation_repository": "qiuzh20/gated_attention",
+      "implementation_revision": "f4c2a5f6ffd6ec709e0c60072c95ed4f5ce5b5d2",
+      "repository": "QwQZh/gated_attention",
+      "revision": "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b"
+    },
+    "output": {
+      "directory": "artifacts/cycle_b/b7_qwen"
+    },
+    "probe": {
+      "attention_topk": 5,
+      "bootstrap_samples": 2000,
+      "capture_batch_size": 4,
+      "confidence": 0.95,
+      "intervention_batch_size": 24,
+      "max_length": 32,
+      "seed": 2718
+    },
+    "resource_gate": {
+      "reserve_device_bytes": 536870912,
+      "reserve_host_bytes": 1073741824,
+      "retry_known_failed_exact_load": false
+    },
+    "revision": 1,
+    "standard_model": {
+      "attention_implementation": "eager",
+      "local_snapshot": "C:/Users/jsima/.cache/huggingface/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca",
+      "repository": "Qwen/Qwen3-0.6B",
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "runtime_dtype": "float16"
+    }
+  },
+  "metadata": {
+    "batch_size": 24,
+    "commit_hash": "1e6df242349b450433c2446db74789571735f3f0",
+    "context_length": 32,
+    "dataset": "deterministic_predictable_sequence_probe",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {
+      "attention_candidate": "attention_o_proj_output",
+      "ff_candidate": "mlp_output",
+      "residual_after_attention": "residual_pre+attention_output",
+      "residual_post": "decoder_layer_output",
+      "residual_pre": "decoder_layer_input"
+    },
+    "intervention": "native+skip_attention+skip_ff+skip_block",
+    "model": "Qwen/Qwen3-0.6B",
+    "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "model_variant": "standard_0.6B_plus_gated_resource_audit",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "cycle-b-b7-qwen",
+    "seed": 2718,
+    "tokenizer": "Qwen/Qwen3-0.6B",
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "cycle": "B",
+  "experiment": "B7",
+  "revision": 1,
+  "status": "standard_qwen_complete_exact_gated_resource_stop",
+  "standard_model": {
+    "repository": "Qwen/Qwen3-0.6B",
+    "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "parameters": 596049920,
+    "runtime_dtype": "torch.float16",
+    "layers": 28,
+    "native_parity_max_logit_error": 0.0,
+    "examples": 24,
+    "native_mean_log_probability": -2.4213082790374756,
+    "residual_rows": 10192,
+    "attention_rows": 163072,
+    "causal_rows": 2016,
+    "matrix_rows": 5488
+  },
+  "standard_qwen_causal_utility": {
+    "skip_attention": {
+      "mean_utility": 0.8086124015972018,
+      "negative_layer_fraction": 0.0,
+      "minimum_layer": 12,
+      "minimum_utility": 0.029929371550679207,
+      "maximum_layer": 0,
+      "maximum_utility": 12.34257984161377
+    },
+    "skip_block": {
+      "mean_utility": 0.9714826529379934,
+      "negative_layer_fraction": 0.0,
+      "minimum_layer": 14,
+      "minimum_utility": 0.010992427356541157,
+      "maximum_layer": 0,
+      "maximum_utility": 9.731181144714355
+    },
+    "skip_ff": {
+      "mean_utility": 0.5106870212725231,
+      "negative_layer_fraction": 0.10714285714285714,
+      "minimum_layer": 17,
+      "minimum_utility": -0.026118380948901176,
+      "maximum_layer": 1,
+      "maximum_utility": 5.6040215492248535
+    }
+  },
+  "standard_qwen_correlations": {
+    "attention_entropy_vs_sa_utility_spearman": -0.0005473453749315818,
+    "sa_norm_vs_sa_utility_spearman": 0.32183908045977005,
+    "ff_norm_vs_ff_utility_spearman": 0.6995073891625616
+  },
+  "gated_release": {
+    "repository": "QwQZh/gated_attention",
+    "revision": "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b",
+    "static_gate_sequence_verified": true,
+    "real_native_parity_completed": false,
+    "examples_evaluated": 0,
+    "gate_metrics_available": false,
+    "reason": "exact checkpoint exceeds measured host/device headroom and prior exact loads failed"
+  },
+  "resource_audit": {
+    "captured_before_standard_model_load": true,
+    "host_total_bytes": 16964759552,
+    "host_available_bytes": 1837993984,
+    "cuda_available": true,
+    "device_name": "NVIDIA GeForce GTX 950M",
+    "device_total_bytes": 4294836224,
+    "device_free_bytes": 3579559936,
+    "disk_free_bytes": 62083072,
+    "standard_checkpoint_cached": true,
+    "standard_on_disk_bytes": 1503300328,
+    "standard_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "gated_checkpoint_cached": true,
+    "gated_on_disk_bytes": 3443609378,
+    "gated_named_parameter_count": 2033181696,
+    "gated_parameter_bytes": 4066363392,
+    "gated_dtypes": [
+      "torch.bfloat16"
+    ],
+    "baseline_config_cached": true,
+    "baseline_weights_cached": false,
+    "static_exact_revision_gate_sequence_verified": true,
+    "modeling_sha256": "49ff727cca160fb180c50b60891e16e91bb455641489f3dd17bce38434e590ae",
+    "configuration_sha256": "899072d90e611ff24c4e6d6689b745385a931d85ff81a851f4dc52ee614ef2ad",
+    "host_fit_with_reserve": false,
+    "device_fit_with_reserve": false,
+    "exact_gated_load_eligible": false,
+    "known_exact_load_attempts": {
+      "checkpoint_variant": "1B_gate_headwise",
+      "requested_dtype": "bfloat16",
+      "fallback_dtype": "float16",
+      "reason_for_fallback": "legacy_GPU_kernel_compatibility_precaution",
+      "runtime_bfloat16_probe": "passed",
+      "ordinary_load": "killed_during_cpu_materialization",
+      "fp16_recovery": "mmap_meta_model_direct_gpu_stream_cuda_out_of_memory_before_model_complete",
+      "native_bfloat16_recovery": "cuda_out_of_memory_on_initial_594_MiB_embedding_placement",
+      "real_native_parity_completed": false
+    },
+    "new_download_bytes": 0
+  },
+  "b8_b9_gate_open": false,
+  "elapsed_seconds": 170.35585810011253,
+  "interpretation": "The common probe is numerically valid on a real small standard Qwen model. The matched released baseline/headwise comparison remains unevaluated, so B7 does not establish gated-Qwen transfer and does not open B8/B9."
+}

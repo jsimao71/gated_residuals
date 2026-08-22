@@ -168,8 +168,14 @@ instrumentation smoke run.
   minimum layer-8 FF effect persisted, and all soft-gated candidates were still evaluated. B6
   supports functional amplitude modulation, not quality improvement or compute saving. Artifacts
   are under `artifacts/cycle_b/b6_gating`.
-- **B7 next**: re-audit the smallest practical Qwen baseline/gated pair and run only if exact native
-  parity fits available host/device memory.
+- **B7 complete with a bounded resource stop**: cached Qwen3-0.6B completed exact native parity,
+  a 24-example predictable-sequence residual/attention atlas, and all 28-layer SA/FF/block
+  ablations. Every layer had positive mean SA and block utility; three FF means were negative but
+  all three confidence intervals crossed zero. FF update magnitude tracked FF utility more strongly
+  than the analogous SA relation, while attention entropy did not track SA utility. The pinned
+  headwise gated release still could not fit measured RAM/VRAM headroom, so it has zero evaluated
+  examples and no gate result. Artifacts are under `artifacts/cycle_b/b7_qwen`. B8/B9 remain closed
+  because the matched Qwen comparison did not complete end to end.
 
 ## Released gated-attention comparison
 

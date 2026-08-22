@@ -1,0 +1,3 @@
+# B7 failure and null-result notes
+
+The cached Qwen3-0.6B standard model completed exact native-forward parity, the residual/SA/FF atlas, attention metrics, and all layerwise causal ablations. The exact pinned headwise gated release was not retried because its measured parameter storage exceeds current RAM/VRAM headroom and the same checkpoint previously failed ordinary CPU materialization and two direct GPU placements. No baseline release weights were downloaded, no gated examples were evaluated, and no gated-attention behavioral claim is made. B8/B9 remain closed because B7 did not work end-to-end.

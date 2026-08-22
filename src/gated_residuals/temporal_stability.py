@@ -103,11 +103,12 @@ def linear_cka(left: torch.Tensor, right: torch.Tensor) -> torch.Tensor:
         raise ValueError("CKA expects two [observation, feature] matrices")
     x = left.detach().float() - left.detach().float().mean(dim=0, keepdim=True)
     y = right.detach().float() - right.detach().float().mean(dim=0, keepdim=True)
-    cross = torch.linalg.matrix_norm(x.transpose(0, 1) @ y).square()
-    denominator = (
-        torch.linalg.matrix_norm(x.transpose(0, 1) @ x)
-        * torch.linalg.matrix_norm(y.transpose(0, 1) @ y)
-    )
+    # The observation-Gram identity is exactly equivalent to the feature-space
+    # formulation while avoiding hidden_size x hidden_size products for LLM probes.
+    x_gram = x @ x.transpose(0, 1)
+    y_gram = y @ y.transpose(0, 1)
+    cross = (x_gram * y_gram).sum()
+    denominator = torch.linalg.matrix_norm(x_gram) * torch.linalg.matrix_norm(y_gram)
     return cross / denominator.clamp_min(1e-8)
 
 

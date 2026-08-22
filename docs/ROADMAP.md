@@ -35,6 +35,11 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
 - B6 completed five whole-block and five SA/FF-gated deep runs. Native quality matched baseline;
   forced-open/mean/shuffled interventions showed functional modulation, but magnitude predicted
   gates better than causal utility, the negative cell persisted, and soft gates saved no compute.
+- B7 validated the common adapter with exact parity on cached Qwen3-0.6B and ran the full 28-layer
+  residual, attention, and SA/FF/block-ablation probe on 24 predictable sequences. Standard-Qwen
+  results showed positive mean SA/block utility at every layer and no confidence-supported negative
+  FF layer. The exact pinned gated release remained outside measured memory headroom, so no gated
+  examples or gate metrics exist and the conditional B8/B9 gate remains closed.
 
 ## Proposed series
 
@@ -110,9 +115,9 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Re-audit and attempt B7 on the smallest practical Qwen baseline/gated comparison.
-2. Stop B7 before metrics if exact native parity cannot fit available host/device memory.
-3. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
-4. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
-   extend the same adapter semantics to Llama and Gemma if resource use is manageable.
-5. Keep Papers 2--5 evidence-conditional; Cycle A through B6 do not support expanding their claims.
+1. Retain B7's standard-Qwen atlas as a real-checkpoint adapter validation, not a gated comparison.
+2. Run the pinned baseline/headwise release only on hardware with enough headroom to complete real
+   native parity and interventions.
+3. Keep B8/B9 closed until that Qwen path works end to end; record the conditional stops explicitly.
+4. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
+5. Keep Papers 2--5 evidence-conditional; Cycle A through B7 do not support expanding their claims.

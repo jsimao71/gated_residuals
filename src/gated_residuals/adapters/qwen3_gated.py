@@ -14,6 +14,7 @@ do not alter that sequence. Counterfactual gate modes act only at the input to
 from __future__ import annotations
 
 from collections.abc import Iterable
+from contextlib import AbstractContextManager
 from typing import Any
 
 import torch
@@ -28,14 +29,30 @@ OFFICIAL_CODE_REVISION = "f4c2a5f6ffd6ec709e0c60072c95ed4f5ce5b5d2"
 OFFICIAL_MODEL_REVISION = "aad415c45ec6b4fa727ef3ff3f4e9f62f958d49b"
 
 
+def _attention_dimension(attention: Any, attribute: str, config_attribute: str) -> int:
+    """Read dimensions from either the released fork or current Transformers."""
+    value = getattr(attention, attribute, None)
+    if value is None:
+        value = getattr(getattr(attention, "config", None), config_attribute, None)
+    if value is None:
+        raise AttributeError(f"attention exposes neither {attribute} nor config.{config_attribute}")
+    return int(value)
+
+
+def _attention_dimensions(attention: Any) -> tuple[int, int, int, int]:
+    heads = _attention_dimension(attention, "num_heads", "num_attention_heads")
+    kv_heads = _attention_dimension(attention, "num_key_value_heads", "num_key_value_heads")
+    groups = int(getattr(attention, "num_key_value_groups", heads // kv_heads))
+    head_dim = _attention_dimension(attention, "head_dim", "head_dim")
+    return heads, kv_heads, groups, head_dim
+
+
 def extract_qwen3_headwise_gate(q_projection: torch.Tensor, attention: Any) -> torch.Tensor:
     """Extract native ``g[b,t,h,1]`` from the release's packed query projection."""
     if not bool(getattr(attention, "headwise_attn_output_gate", False)):
         raise ValueError("attention module is not configured for headwise output gating")
     batch, tokens, _ = q_projection.shape
-    kv_heads = int(attention.num_key_value_heads)
-    groups = int(attention.num_key_value_groups)
-    head_dim = int(attention.head_dim)
+    _, kv_heads, groups, head_dim = _attention_dimensions(attention)
     packed = q_projection.view(batch, tokens, kv_heads, -1)
     query_width = head_dim * groups
     expected_width = query_width + groups
@@ -77,6 +94,8 @@ class Qwen3AttentionAdapter(ModelProbeAdapter):
         self._handles: list[torch.utils.hooks.RemovableHandle] = []
         self._captures: list[ProbeCapture] = []
         self._state: dict[int, dict[str, torch.Tensor]] = {}
+        self._components: dict[int, dict[str, torch.Tensor]] = {}
+        self._latest_logits: torch.Tensor | None = None
 
     @staticmethod
     def _resolve_layers(model: torch.nn.Module) -> list[torch.nn.Module]:
@@ -103,6 +122,8 @@ class Qwen3AttentionAdapter(ModelProbeAdapter):
             raise RuntimeError("adapter is already active")
         self._captures.clear()
         self._state.clear()
+        self._components.clear()
+        self._latest_logits = None
         for index, layer in enumerate(self._layers):
             attention = layer.self_attn
             is_headwise = bool(getattr(attention, "headwise_attn_output_gate", False))
@@ -126,8 +147,7 @@ class Qwen3AttentionAdapter(ModelProbeAdapter):
                 state = self._state.setdefault(layer_index, {})
                 gate = state.get("gate")
                 batch, tokens, _ = effective_flat.shape
-                heads = int(attn.num_heads)
-                head_dim = int(attn.head_dim)
+                heads, _, _, head_dim = _attention_dimensions(attn)
                 effective_heads = effective_flat.view(batch, tokens, heads, head_dim)
                 if gate is None:
                     if bool(getattr(attn, "headwise_attn_output_gate", False)):
@@ -205,15 +225,48 @@ class Qwen3AttentionAdapter(ModelProbeAdapter):
                     capture.detached(cpu=self.detach_to_cpu) if self.detach_to_cpu else capture
                 )
 
-            self._handles.extend(
-                [
-                    layer.register_forward_pre_hook(layer_pre),
-                    attention.q_proj.register_forward_hook(q_hook),
-                    attention.o_proj.register_forward_pre_hook(o_pre),
-                    attention.o_proj.register_forward_hook(o_hook),
-                    attention.register_forward_hook(attention_hook),
-                ]
-            )
+            def mlp_hook(module, args, output, layer_index=index):
+                self._state.setdefault(layer_index, {})["ff_update"] = output
+
+            def layer_hook(module, args, output, layer_index=index):
+                state = self._state[layer_index]
+                post = output[0] if isinstance(output, (tuple, list)) else output
+                ff_update = state.get("ff_update", torch.zeros_like(state["effective_update"]))
+                values = {
+                    "residual_pre": state["residual_input"],
+                    "attention_update": state["effective_update"],
+                    "residual_after_attention": state["residual_input"] + state["effective_update"],
+                    "ff_update": ff_update,
+                    "residual_post": post,
+                    "gate": state["gate"],
+                }
+                if self.detach_to_cpu:
+                    values = {name: value.detach().cpu() for name, value in values.items()}
+                self._components[layer_index] = values
+
+            layer_handles = [
+                layer.register_forward_pre_hook(layer_pre),
+                attention.q_proj.register_forward_hook(q_hook),
+                attention.o_proj.register_forward_pre_hook(o_pre),
+                attention.o_proj.register_forward_hook(o_hook),
+                attention.register_forward_hook(attention_hook),
+                layer.register_forward_hook(layer_hook),
+            ]
+            if hasattr(layer, "mlp"):
+                layer_handles.insert(-1, layer.mlp.register_forward_hook(mlp_hook))
+            self._handles.extend(layer_handles)
+        def model_hook(module, args, output):
+            if hasattr(output, "logits"):
+                logits = output.logits
+            elif isinstance(output, torch.Tensor):
+                logits = output
+            elif isinstance(output, (tuple, list)) and output:
+                logits = output[0]
+            else:
+                raise TypeError("cannot locate logits in model output")
+            self._latest_logits = logits.detach().cpu() if self.detach_to_cpu else logits
+
+        self._handles.append(self.model.register_forward_hook(model_hook))
         return self
 
     def __exit__(self, exc_type, exc, traceback) -> None:
@@ -222,6 +275,107 @@ class Qwen3AttentionAdapter(ModelProbeAdapter):
         self._handles.clear()
         self._state.clear()
 
+    def _component(self, layer: int, name: str, token: int) -> torch.Tensor:
+        if layer not in self._components:
+            raise RuntimeError("no instrumented forward has completed")
+        return self._components[layer][name][:, token]
+
+    def residual_pre(self, layer: int, token: int) -> torch.Tensor:
+        return self._component(layer, "residual_pre", token)
+
+    def attention_candidate_update(self, layer: int, token: int) -> torch.Tensor:
+        capture = self._captures[layer]
+        return capture.candidate_update[:, token]
+
+    def residual_after_attention(self, layer: int, token: int) -> torch.Tensor:
+        return self._component(layer, "residual_after_attention", token)
+
+    def ff_candidate_update(self, layer: int, token: int) -> torch.Tensor:
+        return self._component(layer, "ff_update", token)
+
+    def residual_post(self, layer: int, token: int) -> torch.Tensor:
+        return self._component(layer, "residual_post", token)
+
+    def attention_weights(self, layer: int, head: int, token: int) -> torch.Tensor:
+        weights = self._captures[layer].attention_weights
+        if weights is None:
+            raise RuntimeError("attention weights were not requested by the model forward")
+        return weights[:, head, token]
+
+    def gate(self, layer: int, head: int, token: int) -> torch.Tensor:
+        gate = self._captures[layer].gate
+        if gate is None:
+            raise RuntimeError("no gate was captured")
+        return gate[:, token, head]
+
+    def logits(self) -> torch.Tensor:
+        if self._latest_logits is None:
+            raise RuntimeError("no instrumented forward has completed")
+        return self._latest_logits
+
 
 # Backward-compatible descriptive name for code that only handles the gated variant.
 Qwen3GatedAttentionAdapter = Qwen3AttentionAdapter
+
+
+class Qwen3ResidualIntervention(AbstractContextManager["Qwen3ResidualIntervention"]):
+    """Explicitly zero one Qwen attention/FF write or bypass one full block."""
+
+    MODES = {"skip_attention", "skip_ff", "skip_block"}
+
+    def __init__(self, model: torch.nn.Module, *, layer: int, mode: str):
+        if mode not in self.MODES:
+            raise ValueError(f"unsupported residual intervention: {mode}")
+        self.model = model
+        self.layer_index = int(layer)
+        self.mode = mode
+        self._handles: list[torch.utils.hooks.RemovableHandle] = []
+        self._block_input: torch.Tensor | None = None
+
+    def __enter__(self) -> "Qwen3ResidualIntervention":
+        layers = Qwen3AttentionAdapter._resolve_layers(self.model)
+        if not 0 <= self.layer_index < len(layers):
+            raise IndexError(f"layer {self.layer_index} outside [0, {len(layers)})")
+        layer = layers[self.layer_index]
+
+        def zero_output(module, args, output):
+            if isinstance(output, tuple):
+                return (torch.zeros_like(output[0]), *output[1:])
+            if isinstance(output, list):
+                return [torch.zeros_like(output[0]), *output[1:]]
+            return torch.zeros_like(output)
+
+        if self.mode == "skip_attention":
+            self._handles.append(layer.self_attn.register_forward_hook(zero_output))
+        elif self.mode == "skip_ff":
+            if not hasattr(layer, "mlp"):
+                raise TypeError("decoder layer does not expose an mlp sublayer")
+            self._handles.append(layer.mlp.register_forward_hook(zero_output))
+        else:
+            def remember_input(module, args):
+                if not args:
+                    raise RuntimeError("block intervention requires positional hidden states")
+                self._block_input = args[0]
+
+            def bypass_block(module, args, output):
+                if self._block_input is None:
+                    raise RuntimeError("block input hook did not run")
+                if isinstance(output, tuple):
+                    return (self._block_input, *output[1:])
+                if isinstance(output, list):
+                    return [self._block_input, *output[1:]]
+                return self._block_input
+
+            self._handles.extend(
+                [
+                    layer.register_forward_pre_hook(remember_input),
+                    layer.register_forward_hook(bypass_block),
+                ]
+            )
+        return self
+
+    def __exit__(self, exc_type, exc, traceback) -> None:
+        for handle in self._handles:
+            handle.remove()
+        self._handles.clear()
+        self._block_input = None

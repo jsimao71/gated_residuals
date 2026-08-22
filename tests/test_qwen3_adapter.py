@@ -2,7 +2,12 @@ from types import SimpleNamespace
 
 import torch
 
-from gated_residuals.adapters import Qwen3AttentionAdapter, Qwen3GatedAttentionAdapter, assert_native_parity
+from gated_residuals.adapters import (
+    Qwen3AttentionAdapter,
+    Qwen3GatedAttentionAdapter,
+    Qwen3ResidualIntervention,
+    assert_native_parity,
+)
 from gated_residuals.causal_ablation import GateIntervention
 
 
@@ -103,3 +108,43 @@ def test_same_adapter_captures_released_baseline_semantics():
         assert torch.all(capture.gate == 1)
         assert torch.equal(capture.candidate_update, capture.effective_update)
         assert capture.metadata["model_variant"] == "baseline"
+
+
+def test_adapter_supports_current_transformers_config_dimensions_and_common_api():
+    model = FakeQwen()
+    for layer in model.layers:
+        attention = FakeBaselineAttention()
+        attention.config = SimpleNamespace(
+            num_attention_heads=2,
+            num_key_value_heads=1,
+            head_dim=2,
+        )
+        del attention.num_heads
+        del attention.num_key_value_heads
+        del attention.num_key_value_groups
+        del attention.head_dim
+        layer.self_attn = attention
+    inputs = {"input_ids": torch.tensor([[0, 1, 2]])}
+    adapter = Qwen3AttentionAdapter(model)
+    assert assert_native_parity(model, adapter, inputs) == 0.0
+    assert torch.equal(adapter.logits(), model(**inputs))
+    assert adapter.residual_pre(0, 1).shape == (1, 4)
+    assert adapter.attention_candidate_update(0, 1).shape == (1, 4)
+    assert torch.equal(adapter.ff_candidate_update(0, 1), torch.zeros(1, 4))
+    assert torch.equal(
+        adapter.residual_after_attention(0, 1),
+        adapter.residual_post(0, 1),
+    )
+
+
+def test_qwen_residual_interventions_are_explicit_and_reversible():
+    model = FakeQwen()
+    inputs = {"input_ids": torch.tensor([[0, 1, 2]])}
+    native = model(**inputs)
+    with Qwen3ResidualIntervention(model, layer=0, mode="skip_attention"):
+        attention_skipped = model(**inputs)
+    with Qwen3ResidualIntervention(model, layer=0, mode="skip_block"):
+        block_skipped = model(**inputs)
+    assert not torch.equal(native, attention_skipped)
+    assert torch.equal(attention_skipped, block_skipped)
+    assert torch.equal(model(**inputs), native)
