@@ -23,8 +23,11 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   completed exact-parity SA/FF decomposition: seven of eight competent task--layer cells had
   replicated SA $>$ FF utility, but both sublayers were useful and no repair candidate appeared.
 - B3 completed the token/depth stability and causal repair atlas. Late FF-norm correctness effects
-  replicated exploratorily, but zero of 12,150 perturbations met joint vector and task-gap recovery;
-  gating remains closed pending depth/task evidence.
+  replicated exploratorily, but zero of 12,150 perturbations met joint vector and task-gap recovery.
+- B4 completed 25 depth/capacity runs. The effective-block fraction fell with depth but failed the
+  strict competence-preservation rule; two competent-task FF cells were reliably negative and one
+  late SA cell was reliably near zero. This conditionally opens B6 after B5 ecology validation,
+  without supporting repair or strong interference.
 
 ## Proposed series
 
@@ -100,10 +103,9 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Train the B4 depth series and matched-parameter control now that B3 instrumentation has passed.
-2. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
-3. Reopen gating only if B2--B5 exposes reliable redundancy, negative utility, task-conditioned
-   roles, repair, or depth slack.
+1. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
+2. Test whether B4's localized negative/near-zero sublayer cells generalize across matched tasks.
+3. Run B6 only on evidence-selected conditions if the Cycle B trigger remains valid after B5.
 4. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
    extend the same adapter semantics to Llama and Gemma if resource use is manageable.
-5. Keep Papers 2--5 evidence-conditional; Cycle A through B3 do not support expanding their claims.
+5. Keep Papers 2--5 evidence-conditional; Cycle A through B4 do not support expanding their claims.

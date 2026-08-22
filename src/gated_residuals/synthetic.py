@@ -92,6 +92,7 @@ def generate_counterfactual_split(
     families: int,
     family_offset: int,
     distractor_probability: float = 0.5,
+    intents: tuple[str, ...] = INTENTS,
 ) -> list[CounterfactualExample]:
     """Generate content-disjoint families with every intent represented per content."""
     examples: list[CounterfactualExample] = []
@@ -99,7 +100,7 @@ def generate_counterfactual_split(
         family_index = family_offset + local_index
         family_id = f"family-{family_index:05d}"
         content = _content(seed, family_index)
-        for intent_index, intent in enumerate(INTENTS):
+        for intent_index, intent in enumerate(intents):
             identifiability = IDENTIFIABILITY[(family_index + intent_index) % len(IDENTIFIABILITY)]
             rng = random.Random(_stable_seed(seed, split, family_index, intent))
             distractor = rng.random() < distractor_probability
@@ -134,10 +135,13 @@ def build_splits(config: dict) -> dict[str, list[CounterfactualExample]]:
     seed = int(data["generation_seed"])
     train_n, val_n, test_n = (int(data[name]) for name in ("train_families", "val_families", "test_families"))
     probability = float(data.get("distractor_probability", 0.5))
+    intents = tuple(data.get("intents", INTENTS))
+    if not intents or len(set(intents)) != len(intents) or not set(intents).issubset(INTENTS):
+        raise ValueError(f"data.intents must be a non-empty unique subset of {INTENTS}")
     return {
-        "train": generate_counterfactual_split("train", seed=seed, families=train_n, family_offset=0, distractor_probability=probability),
-        "val": generate_counterfactual_split("val", seed=seed, families=val_n, family_offset=train_n, distractor_probability=probability),
-        "test": generate_counterfactual_split("test", seed=seed, families=test_n, family_offset=train_n + val_n, distractor_probability=probability),
+        "train": generate_counterfactual_split("train", seed=seed, families=train_n, family_offset=0, distractor_probability=probability, intents=intents),
+        "val": generate_counterfactual_split("val", seed=seed, families=val_n, family_offset=train_n, distractor_probability=probability, intents=intents),
+        "test": generate_counterfactual_split("test", seed=seed, families=test_n, family_offset=train_n + val_n, distractor_probability=probability, intents=intents),
     }
 
 

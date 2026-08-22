@@ -1,0 +1,53 @@
+{
+  "cycle": "B",
+  "experiment": "B4",
+  "revision": 1,
+  "source_commit": "590550bc8c2eb287ab3a685d3e89449d671bd6c9",
+  "conditions": 5,
+  "runs": 25,
+  "seeds_per_condition": 5,
+  "causal_rows": 50400,
+  "quality_rows": 4500,
+  "matrix_rows": 51520,
+  "parameters": {
+    "depth4_width64": 148307,
+    "depth8_width64": 282195,
+    "depth12_width64": 416083,
+    "depth16_width64": 549971,
+    "depth16_width32_matched": 143955
+  },
+  "native_capture_max_logit_error": 0.0,
+  "all_main_conditions_competent": false,
+  "effective_block_fraction_by_depth": {
+    "4": 1.0,
+    "8": 0.9375,
+    "12": 0.875,
+    "16": 0.7750000059604645
+  },
+  "depth_dependent_slack": false,
+  "reliable_near_zero_utility": true,
+  "reliable_negative_utility": true,
+  "repeated_repair": false,
+  "reliable_negative_cells": [
+    {
+      "condition": "depth12_width64",
+      "task_family": "minimum",
+      "layer": 4,
+      "components": [
+        "ff"
+      ]
+    },
+    {
+      "condition": "depth16_width64",
+      "task_family": "minimum",
+      "layer": 13,
+      "components": [
+        "ff"
+      ]
+    }
+  ],
+  "b6_gate_open_from_b4": true,
+  "elapsed_seconds": 565.9999120999128,
+  "postprocess_elapsed_seconds": 3.5825641001574695,
+  "interpretation": "Geometry and redundancy remain descriptive; the B6 gate uses replicated causal utility, repair, or competence-preserving depth slack only."
+}

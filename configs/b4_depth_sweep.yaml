@@ -1,0 +1,45 @@
+cycle: B
+experiment: B4
+revision: 1
+description: Controlled deep-capacity sweep on the competence-preserving maximum/minimum ecology.
+data:
+  generation_seed: 1729
+  train_families: 240
+  val_families: 60
+  test_families: 90
+  distractor_probability: 0.5
+  intents: [maximum, minimum]
+  max_length: 56
+model:
+  heads: 4
+  mlp_ratio: 2
+  max_length: 56
+  dropout: 0.0
+  goal_width: 24
+conditions:
+  - {name: depth4_width64, depth: 4, width: 64, matched_parameter_control: false}
+  - {name: depth8_width64, depth: 8, width: 64, matched_parameter_control: false}
+  - {name: depth12_width64, depth: 12, width: 64, matched_parameter_control: false}
+  - {name: depth16_width64, depth: 16, width: 64, matched_parameter_control: false}
+  - {name: depth16_width32_matched, depth: 16, width: 32, matched_parameter_control: true}
+training:
+  seeds: [11, 22, 33, 44, 55]
+  device: auto
+  epochs: 18
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_grad_norm: 1.0
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  competence_accuracy: 0.95
+  competence_delta: 0.03
+  negligible_utility: 0.002
+  minimum_seed_fraction: 0.8
+  amplification_ratio: 1.25
+  repair_fraction: 0.25
+  repeated_repair_rate: 0.25
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_b/b4_depth_sweep

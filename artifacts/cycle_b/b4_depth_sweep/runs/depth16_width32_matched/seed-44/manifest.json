@@ -1,0 +1,83 @@
+{
+  "argv": [
+    "scripts/run_b4.py"
+  ],
+  "config": {
+    "cycle": "B",
+    "data": {
+      "distractor_probability": 0.5,
+      "generation_seed": 1729,
+      "intents": [
+        "maximum",
+        "minimum"
+      ],
+      "max_length": 56,
+      "test_families": 90,
+      "train_families": 240,
+      "val_families": 60
+    },
+    "description": "Controlled deep-capacity sweep on the competence-preserving maximum/minimum ecology.",
+    "experiment": "B4",
+    "model": {
+      "dropout": 0.0,
+      "goal_width": 24,
+      "heads": 4,
+      "layers": 16,
+      "max_length": 56,
+      "mlp_ratio": 2,
+      "width": 32
+    },
+    "revision": 1,
+    "statistics": {
+      "amplification_ratio": 1.25,
+      "bootstrap_samples": 2000,
+      "competence_accuracy": 0.95,
+      "competence_delta": 0.03,
+      "confidence": 0.95,
+      "final_test_frozen": true,
+      "minimum_seed_fraction": 0.8,
+      "negligible_utility": 0.002,
+      "repair_fraction": 0.25,
+      "repeated_repair_rate": 0.25
+    },
+    "training": {
+      "batch_size": 64,
+      "device": "auto",
+      "epochs": 18,
+      "learning_rate": 0.001,
+      "max_grad_norm": 1.0,
+      "seeds": [
+        11,
+        22,
+        33,
+        44,
+        55
+      ],
+      "weight_decay": 0.0001
+    }
+  },
+  "metadata": {
+    "batch_size": 64,
+    "commit_hash": "590550bc8c2eb287ab3a685d3e89449d671bd6c9",
+    "context_length": 56,
+    "dataset": "synthetic_counterfactual_v1",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "float32",
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {},
+    "intervention": "native",
+    "model": "tiny_residual_decoder",
+    "model_revision": null,
+    "model_variant": "baseline",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "baseline-seed-44",
+    "seed": 44,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

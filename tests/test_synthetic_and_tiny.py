@@ -28,6 +28,13 @@ def test_counterfactual_generation_is_deterministic_and_content_matched():
     assert train_families.isdisjoint(test_families)
 
 
+def test_task_subset_preserves_counterfactual_content_matching():
+    config = {"data": {**CONFIG["data"], "intents": ["maximum", "minimum"]}}
+    splits = build_splits(config)
+    assert {example.intent for example in splits["train"]} == {"maximum", "minimum"}
+    assert len(splits["test"]) == 4
+
+
 def test_tiny_model_capture_and_skip_parity():
     model = TinyResidualDecoder(32, width=16, layers=3, heads=4, max_length=8)
     ids = torch.randint(1, 32, (2, 6))
