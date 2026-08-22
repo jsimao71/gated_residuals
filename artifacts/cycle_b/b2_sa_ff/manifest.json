@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "scripts\\run_b2.py"
+  ],
+  "config": {
+    "capture": {
+      "matrix_token_scope": "final_nonpadding",
+      "random_replacement_seed": 2601,
+      "token_bins": 10,
+      "zero_replacement_aliases_skip": true
+    },
+    "checkpoint_glob": "results/e1/runs/seed-*/model.pt",
+    "cycle": "B",
+    "description": "Pre-norm self-attention versus feed-forward decomposition on frozen E1 baselines.",
+    "experiment": "B2",
+    "interventions": [
+      "native",
+      "skip_sa",
+      "zero_sa_replacement",
+      "skip_ff",
+      "zero_ff_replacement",
+      "skip_full_block",
+      "norm_matched_random_sa",
+      "norm_matched_random_ff"
+    ],
+    "output": {
+      "directory": "artifacts/cycle_b/b2_sa_ff"
+    },
+    "quality_metric": "target_log_probability",
+    "revision": 1,
+    "source_cycle": "A",
+    "source_experiment": "E1",
+    "statistics": {
+      "bootstrap_samples": 2000,
+      "confidence": 0.95,
+      "final_test_frozen": true,
+      "minimum_seed_fraction": 0.8,
+      "negligible_utility": 0.002,
+      "specialization_effect": 0.01
+    }
+  },
+  "metadata": {
+    "batch_size": 64,
+    "commit_hash": "417bc38a053dc5a58b1e30b439b6fa531d1cf816",
+    "context_length": 56,
+    "dataset": "synthetic_counterfactual_v1",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "float32",
+    "environment": {},
+    "gate_tensor_semantics": null,
+    "hook_locations": {
+      "attention_candidate_update": "TinyOutput.attention_candidates[layer]",
+      "ff_candidate_update": "TinyOutput.ff_candidates[layer]",
+      "residual_after_attention": "TinyOutput.states_after_attention[layer]",
+      "residual_post": "TinyOutput.states[layer + 1]",
+      "residual_pre": "TinyOutput.states[layer]"
+    },
+    "intervention": "native_skip_sa_skip_ff_skip_block_norm_matched_random",
+    "model": "tiny_residual_decoder",
+    "model_revision": null,
+    "model_variant": "baseline",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "cycle-b-b2-sa-ff",
+    "seed": 0,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

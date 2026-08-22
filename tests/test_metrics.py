@@ -12,6 +12,7 @@ from gated_residuals.residual_dynamics import (
     cancellation_score,
     causal_block_utility,
     pairwise_layer_matrices,
+    sa_ff_geometry,
     update_geometry,
 )
 from gated_residuals.temporal_stability import (
@@ -60,6 +61,21 @@ def test_cancellation_and_full_layer_matrices_are_analytic():
     assert matrices["update_cosine"][0, 1] == pytest.approx(-1.0)
     assert matrices["update_cancellation"][0, 1] == pytest.approx(1.0)
     assert matrices["residual_state_cka"][0, 1] == pytest.approx(1.0)
+
+
+def test_sa_ff_geometry_uses_distinct_pre_norm_locations():
+    state = torch.tensor([[1.0, 0.0], [0.0, 2.0]])
+    attention = torch.tensor([[0.0, 1.0], [0.0, -1.0]])
+    ff = torch.tensor([[0.0, -1.0], [0.0, 1.0]])
+    metrics = sa_ff_geometry(state, attention, ff)
+    assert torch.allclose(metrics["attention_relative_update_norm"], torch.tensor([1.0, 0.5]))
+    assert torch.allclose(
+        metrics["ff_relative_update_norm"],
+        torch.tensor([1 / math.sqrt(2), 1.0]),
+    )
+    assert torch.allclose(metrics["attention_ff_cosine"], torch.tensor([-1.0, -1.0]))
+    assert torch.allclose(metrics["attention_ff_cancellation"], torch.ones(2))
+    assert torch.allclose(metrics["combined_update_norm"], torch.zeros(2))
 
 
 def test_amplification_repair_requires_growth_then_recovery():

@@ -14,6 +14,11 @@ class TinyOutput:
     states: list[torch.Tensor] = field(default_factory=list)
     candidates: list[torch.Tensor] = field(default_factory=list)
     effective_updates: list[torch.Tensor] = field(default_factory=list)
+    attention_candidates: list[torch.Tensor] = field(default_factory=list)
+    attention_effective_updates: list[torch.Tensor] = field(default_factory=list)
+    states_after_attention: list[torch.Tensor] = field(default_factory=list)
+    ff_candidates: list[torch.Tensor] = field(default_factory=list)
+    ff_effective_updates: list[torch.Tensor] = field(default_factory=list)
     gates: list[torch.Tensor] = field(default_factory=list)
     attention: list[torch.Tensor] = field(default_factory=list)
     goal_states: list[torch.Tensor] = field(default_factory=list)
@@ -33,7 +38,9 @@ class CausalResidualBlock(nn.Module):
         )
         self.dropout = nn.Dropout(dropout)
 
-    def candidate(self, state: torch.Tensor, attention_mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def attention_candidate(
+        self, state: torch.Tensor, attention_mask: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         length = state.size(1)
         causal_mask = torch.triu(
             torch.ones((length, length), dtype=torch.bool, device=state.device), diagonal=1
@@ -49,8 +56,23 @@ class CausalResidualBlock(nn.Module):
             average_attn_weights=False,
         )
         attention_output = self.dropout(attention_output)
+        return attention_output, weights
+
+    def ff_candidate(self, state_after_attention: torch.Tensor) -> torch.Tensor:
+        return self.dropout(self.mlp(self.norm_mlp(state_after_attention)))
+
+    def components(
+        self, state: torch.Tensor, attention_mask: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return SA write, post-SA state, FF write, and attention probabilities."""
+        attention_output, weights = self.attention_candidate(state, attention_mask)
         intermediate = state + attention_output
-        mlp_output = self.dropout(self.mlp(self.norm_mlp(intermediate)))
+        mlp_output = self.ff_candidate(intermediate)
+        return attention_output, intermediate, mlp_output, weights
+
+    def candidate(self, state: torch.Tensor, attention_mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """Backward-compatible combined block candidate."""
+        attention_output, _, mlp_output, weights = self.components(state, attention_mask)
         return attention_output + mlp_output, weights
 
 
@@ -118,6 +140,11 @@ class TinyResidualDecoder(nn.Module):
         attention_mask: torch.Tensor,
         *,
         skip_layers: set[int] | None = None,
+        skip_attention_layers: set[int] | None = None,
+        skip_ff_layers: set[int] | None = None,
+        random_attention_layers: set[int] | None = None,
+        random_ff_layers: set[int] | None = None,
+        intervention_seed: int = 0,
         gate_mode: str = "native",
         gate_overrides: list[torch.Tensor] | None = None,
         goal_mode: str = "native",
@@ -125,6 +152,14 @@ class TinyResidualDecoder(nn.Module):
         capture: bool = False,
     ) -> TinyOutput:
         skip_layers = skip_layers or set()
+        skip_attention_layers = skip_attention_layers or set()
+        skip_ff_layers = skip_ff_layers or set()
+        random_attention_layers = random_attention_layers or set()
+        random_ff_layers = random_ff_layers or set()
+        if skip_attention_layers & random_attention_layers:
+            raise ValueError("an attention write cannot be both skipped and randomly replaced")
+        if skip_ff_layers & random_ff_layers:
+            raise ValueError("an FF write cannot be both skipped and randomly replaced")
         positions = torch.arange(input_ids.size(1), device=input_ids.device)
         state = self.token_embedding(input_ids) + self.position_embedding(positions)[None]
         output = TinyOutput(logits=torch.empty(0, device=input_ids.device))
@@ -141,7 +176,28 @@ class TinyResidualDecoder(nn.Module):
                 goal = goal + torch.tanh(self.goal_updates[layer_index](torch.cat([goal, summary], dim=-1)))
                 if capture:
                     output.goal_states.append(goal.detach())
-            candidate, attention = block.candidate(residual_input, attention_mask)
+            attention_candidate, attention = block.attention_candidate(
+                residual_input, attention_mask
+            )
+            attention_applied = attention_candidate
+            if layer_index in skip_attention_layers:
+                attention_applied = torch.zeros_like(attention_candidate)
+            elif layer_index in random_attention_layers:
+                attention_applied = self._norm_matched_random(
+                    attention_candidate,
+                    seed=int(intervention_seed) + 104729 * (layer_index + 1),
+                )
+            state_after_attention = residual_input + attention_applied
+            ff_candidate = block.ff_candidate(state_after_attention)
+            ff_applied = ff_candidate
+            if layer_index in skip_ff_layers:
+                ff_applied = torch.zeros_like(ff_candidate)
+            elif layer_index in random_ff_layers:
+                ff_applied = self._norm_matched_random(
+                    ff_candidate,
+                    seed=int(intervention_seed) + 130363 * (layer_index + 1),
+                )
+            candidate = attention_applied + ff_applied
             if self.has_gate:
                 gate_source = goal if self.variant == "goal_gated" else summary
                 if self.variant == "goal_gated" and goal_mode == "shuffled":
@@ -174,10 +230,17 @@ class TinyResidualDecoder(nn.Module):
                 # theoretical. Realized conditional execution is measured separately.
                 gate = active.to(gate.dtype)
             effective = gate[:, None, :] * candidate
+            attention_effective = gate[:, None, :] * attention_applied
+            ff_effective = gate[:, None, :] * ff_applied
             state = residual_input + effective
             if capture:
                 output.candidates.append(candidate.detach())
                 output.effective_updates.append(effective.detach())
+                output.attention_candidates.append(attention_candidate.detach())
+                output.attention_effective_updates.append(attention_effective.detach())
+                output.states_after_attention.append(state_after_attention.detach())
+                output.ff_candidates.append(ff_candidate.detach())
+                output.ff_effective_updates.append(ff_effective.detach())
                 output.gates.append(gate.detach())
                 output.attention.append(attention.detach())
                 output.active.append(active.detach())
@@ -195,3 +258,16 @@ class TinyResidualDecoder(nn.Module):
             last = goal_features if self.variant == "goal_only" else last + goal_features
         output.logits = self.output(self.final_norm(last))
         return output
+
+    @staticmethod
+    def _norm_matched_random(update: torch.Tensor, *, seed: int) -> torch.Tensor:
+        generator = torch.Generator(device=update.device).manual_seed(seed)
+        noise = torch.randn(
+            update.shape,
+            dtype=update.dtype,
+            device=update.device,
+            generator=generator,
+        )
+        update_norm = torch.linalg.vector_norm(update.float(), dim=-1, keepdim=True)
+        noise_norm = torch.linalg.vector_norm(noise.float(), dim=-1, keepdim=True).clamp_min(1e-8)
+        return noise * (update_norm / noise_norm).to(noise.dtype)

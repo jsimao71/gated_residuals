@@ -5,10 +5,10 @@
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- Cycle A and Cycle B1 results, August 2026}
+\date{Paper 1 research draft --- Cycle A and Cycle B1--B2 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair, so strong interference was not supported. Matched scalar gates saturated near open and did not improve quality, and an explicit goal latent underperformed pooled ordinary residuals for predicting future utility. Cycle B1 then computed an exhaustive residual atlas over all 30 stored Cycle A checkpoints. Residual states were substantially more similar across layers than their candidate writes, and baseline writes changed from early anti-alignment to later alignment while remaining positively useful on learned tasks. This separates descriptive geometry from causal interference and validates the expanded measurement stack. SA/FF decomposition, stability, capacity expansion, task-ecology repair, and pretrained replication remain prospective Cycle B stages.
+Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair, so strong interference was not supported. Matched scalar gates saturated near open and did not improve quality, and an explicit goal latent underperformed pooled ordinary residuals for predicting future utility. Cycle B1 then computed an exhaustive residual atlas over all 30 stored Cycle A checkpoints. Residual states were substantially more similar across layers than their candidate writes, and baseline writes changed from early anti-alignment to later alignment while remaining positively useful on learned tasks. B2 separated self-attention (SA) and feed-forward (FF) writes with exact native parity. SA had greater causal utility in seven of eight learned-task/layer cells, whereas both sublayers were positively useful and no intra-block repair candidate appeared. Maximum/minimum task-conditioned profiles still did not replicate. These results support sublayer specialization in the shallow regime while separating it from interference and goal-conditioned selection. Stability, capacity expansion, task-ecology repair, and pretrained replication remain prospective Cycle B stages.
 \end{abstract}
 
 \section{Scientific objective}
@@ -416,6 +416,44 @@ Gated variants reproduced Cycle A's near-open behavior in geometric form: the me
 
 B1 passes its instrumentation gate: tensor locations are explicit, the full static battery is exercised, matrices are retained rather than collapsed to one scalar, and required outputs contain no non-finite values. The Cycle A nulls remain unchanged. B2 therefore proceeds to the mandatory separation of self-attention and feed-forward candidate writes, with native-forward and full-block parity tested before any sublayer result is accepted.
 
+\subsection{B2: self-attention versus feed-forward writes}
+B2 refactored the tiny pre-norm block without changing parameters or native computation. It records
+\[
+x_l,\quad \Delta_l^{SA},\quad x_l^{SA}=x_l+\Delta_l^{SA},\quad
+\Delta_l^{FF},\quad x_{l+1}=x_l^{SA}+\Delta_l^{FF}.
+\]
+An architecture-neutral adapter exposes those locations. Native instrumented logits matched untouched logits exactly on every batch. Native and full-block-skip target probabilities also matched the persisted Cycle A records within $5.96\times10^{-8}$. Norm-matched random SA/FF replacements preserved per-token candidate norms within $1.91\times10^{-6}$. A zero replacement is exactly the corresponding skip path and is tested as an alias rather than counted as an independent intervention. Skip-SA recomputes the FF candidate from the intervened state $x_l$, whereas skip-FF retains the native SA write; this semantic difference is explicit in the artifact metadata.
+
+Five frozen E1 baseline checkpoints produced 192,140 layer--token component observations and 5,400 paired example--layer causal observations. Utility uses target log probability. Across the eight competent maximum and minimum task--layer cells, both SA and FF utility intervals were positive. SA-minus-FF specialization replicated under the fixed $0.01$ effect and four-of-five seed rule in seven cells; maximum layer 1 had a positive mean difference but failed seed sign replication. No cell met the intra-block repair criterion.
+
+\begin{table}[ht]
+\centering
+\caption{B2 replicated SA--FF specialization across four layers per task. The modulo-10 task remained unlearned and is not used for competence-controlled task claims.}
+\begin{tabular}{lrrrr}
+\toprule
+Task & SA $>$ FF & FF $>$ SA & Not replicated & Repair candidate \\
+\midrule
+Maximum & 3 & 0 & 1 & 0 \\
+Minimum & 4 & 0 & 0 & 0 \\
+Modulo-10 sum & 0 & 2 & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The causal scale of the distinction was substantial on learned tasks. Mean SA utility across layers was .609 for maximum and .420 for minimum, compared with FF utility .079 and .069. Averaged over all layer interventions, accuracy changed from .612 native to .491 under skip-SA and .603 under skip-FF; full-block skip gave .491. Norm-matched random replacement gave .476 for SA and .591 for FF. These pooled accuracies are descriptive because layer interventions are repeated within examples; the confirmatory result is the seed-paired task--layer utility analysis.
+
+The failed modulo-10 task again supplies a useful negative control rather than positive theory evidence. SA utility was reliably negative at layers 0 and 2, while FF utility was small and positive; those two cells therefore registered FF $>$ SA. However, their full-block utilities were also negative or near zero, the task remained at chance, mean SA--FF cosine was positive rather than compensatory, and no later task-relevant recovery criterion was met. They are not called intra-block repair or strong interference.
+
+SA and FF also differed descriptively. Across correct final-token bins, relative SA write magnitude increased from .251 at layer 0 to .376 at layer 3, while FF decreased from .272 to .229. Both state--write cosines changed from negative early values to positive late values. Across-layer SA update cosine/CKA were .104/.196, compared with .364/.447 for FF writes, indicating that SA writes were more layer-specific under these metrics. Within-block SA--FF cosine was positive on average (.179 maximum, .153 minimum, .229 sum), and normalized cancellation remained near .20--.22; geometry therefore offers no hidden repair claim.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.88\linewidth]{../../../artifacts/cycle_b/b2_sa_ff/figures/b2_sa_ff.pdf}
+\caption{B2 causal SA/FF utility by task and relative candidate-write magnitude by depth. Skip-SA includes the downstream change in the recomputed FF write; utility is therefore a sublayer intervention effect, not the norm of the removed vector.}
+\end{figure}
+
+B2 supports H-B2 in this shallow regime: SA and FF have systematically different causal roles and residual signatures. It does not support H-B3: none of the eight maximum--minimum sublayer utility contrasts replicated under the competence-matched threshold. Nor does it reopen gating, because learned-task sublayers remained positively useful and no repair candidate was found. B3 therefore proceeds to the preregistered static/stability atlas without relabeling positive SA utility as selection pressure.
+
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.
 
@@ -444,7 +482,7 @@ The present design cannot fully remove training-history confounds in pretrained 
 \section{Conclusion}
 Cycle A answers its bounded causal question with a constrained null. On tasks the tiny decoders learned, all four residual blocks contributed positive causal probability utility, while the only negative cell belonged to a chance-level task and lacked repair. Competence-matched counterfactual goals did not yield replicated utility changes. Scalar gates remained nearly open, neither gated variant improved quality or selected independently useful computation, and the explicit goal latent failed the stronger future-utility test against ordinary residual summaries.
 
-Cycle B1 expands what is known without rewriting that null. Across all stored models, the residual carrier changes more smoothly across depth than the candidate writes, and early anti-alignment coexists with positive learned-task utility. The result validates an exhaustive, architecture-neutral geometry and attention atlas while demonstrating why geometry alone cannot name interference. It does not yet test computational slack, SA/FF specialization, temporal repair, or pretrained transfer. Those questions remain assigned to the preregistered B2--B9 sequence, with gating reopened only if redundancy, negative utility, task-conditioned specialization, or replicated repair is first observed.
+Cycle B1--B2 expands what is known without rewriting that null. Across all stored models, the residual carrier changes more smoothly across depth than the candidate writes, and early anti-alignment coexists with positive learned-task utility. Exact SA/FF intervention then shows a real causal asymmetry: SA is more useful than FF in seven of eight learned-task/layer cells, while both remain positively useful. SA writes are also less similar across layers than FF writes. This supports sublayer specialization but not interference, intra-block repair, computational slack, or competence-matched goal-conditioned routing. Those remaining questions stay assigned to B3--B9, with gating reopened only if redundancy, negative utility, task-conditioned specialization, or replicated repair is first observed.
 
 \begin{thebibliography}{9}
 \bibitem{kornblith2019cka}

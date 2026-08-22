@@ -1,5 +1,6 @@
 import torch
 
+from gated_residuals.adapters import TinyModelProbeAdapter, assert_native_parity
 from gated_residuals.synthetic import build_splits
 from gated_residuals.tiny_model import TinyResidualDecoder
 
@@ -35,8 +36,73 @@ def test_tiny_model_capture_and_skip_parity():
     skipped = model(ids, mask, skip_layers={1}, capture=True)
     assert native.logits.shape == (2, 32)
     assert len(native.states) == 4
+    assert len(native.attention_candidates) == 3
+    assert len(native.ff_candidates) == 3
+    for layer in range(model.num_layers):
+        torch.testing.assert_close(
+            native.states_after_attention[layer],
+            native.states[layer] + native.attention_candidates[layer],
+        )
+        torch.testing.assert_close(
+            native.candidates[layer],
+            native.attention_candidates[layer] + native.ff_candidates[layer],
+        )
+        torch.testing.assert_close(
+            native.states[layer + 1], native.states[layer] + native.effective_updates[layer]
+        )
     assert torch.equal(skipped.states[1], skipped.states[2])
     assert not torch.equal(native.logits, skipped.logits)
+
+
+def test_tiny_adapter_exact_native_parity_and_semantic_locations():
+    model = TinyResidualDecoder(32, width=16, layers=2, heads=4, max_length=8)
+    ids = torch.randint(1, 32, (2, 6), generator=torch.Generator().manual_seed(7))
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    adapter = TinyModelProbeAdapter(model)
+    assert assert_native_parity(
+        model, adapter, {"input_ids": ids, "attention_mask": mask}, atol=0.0, rtol=0.0
+    ) == 0.0
+    captures = adapter.captures()
+    assert len(captures) == 2
+    for capture in captures:
+        capture.validate()
+    torch.testing.assert_close(
+        adapter.residual_after_attention(0, 3),
+        adapter.residual_pre(0, 3) + adapter.attention_candidate_update(0, 3),
+    )
+    torch.testing.assert_close(adapter.logits(), model(ids, mask).logits)
+
+
+def test_sa_ff_interventions_and_norm_matched_replacements():
+    model = TinyResidualDecoder(32, width=16, layers=2, heads=4, max_length=8)
+    ids = torch.randint(1, 32, (2, 6), generator=torch.Generator().manual_seed(8))
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    native = model(ids, mask, capture=True)
+    skip_sa = model(ids, mask, skip_attention_layers={0}, capture=True)
+    zero_sa = model(ids, mask, skip_attention_layers={0}, capture=True)
+    skip_ff = model(ids, mask, skip_ff_layers={0}, capture=True)
+    torch.testing.assert_close(skip_sa.logits, zero_sa.logits, rtol=0, atol=0)
+    assert torch.count_nonzero(skip_sa.attention_effective_updates[0]) == 0
+    assert torch.count_nonzero(skip_ff.ff_effective_updates[0]) == 0
+    assert not torch.equal(native.logits, skip_sa.logits)
+    assert not torch.equal(native.logits, skip_ff.logits)
+
+    random_sa = model(
+        ids, mask, random_attention_layers={0}, intervention_seed=19, capture=True
+    )
+    random_ff = model(ids, mask, random_ff_layers={0}, intervention_seed=23, capture=True)
+    torch.testing.assert_close(
+        torch.linalg.vector_norm(random_sa.attention_effective_updates[0], dim=-1),
+        torch.linalg.vector_norm(native.attention_candidates[0], dim=-1),
+        rtol=1e-5,
+        atol=1e-6,
+    )
+    torch.testing.assert_close(
+        torch.linalg.vector_norm(random_ff.ff_effective_updates[0], dim=-1),
+        torch.linalg.vector_norm(random_ff.ff_candidates[0], dim=-1),
+        rtol=1e-5,
+        atol=1e-6,
+    )
 
 
 def test_forced_open_is_exact_baseline_for_gated_model_at_initialization():

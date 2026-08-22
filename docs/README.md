@@ -11,10 +11,11 @@ Paper 1 is the first experimental instantiation. It tests whether Transformer re
 refine, complement, or interfere with task-conditioned trajectories, and whether explicit gates
 select updates with independently measurable downstream consequences.
 
-Cycle B now extends that fixed first-cycle baseline. B1 is complete: the exhaustive residual atlas
-was run over all 30 stored Cycle A checkpoints before any new training. B2 next separates
-self-attention and feed-forward writes; later depth, task-ecology, gating, and pretrained stages
-remain evidence and instrumentation gated.
+Cycle B now extends that fixed first-cycle baseline. B1 ran the exhaustive residual atlas over all
+30 stored Cycle A checkpoints before new training. B2 is also complete: self-attention and
+feed-forward writes are captured at distinct pre-norm locations and intervened on separately with
+exact native parity. Later stability, depth, task-ecology, gating, and pretrained stages remain
+evidence and instrumentation gated.
 
 Start with:
 
@@ -104,6 +105,7 @@ PYTHONPATH=src python scripts/run_e6.py
 HF_HOME=/path/to/hf-cache PYTHONPATH=src python scripts/run_e7.py
 PYTHONPATH=src python scripts/run_e8.py
 PYTHONPATH=src python scripts/run_b1.py
+PYTHONPATH=src python scripts/run_b2.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -132,8 +134,13 @@ instrumentation smoke run.
 - Baseline final-token state--write cosine progressed from -0.406 at layer 0 to 0.329 at layer 3.
   Because Cycle A learned-task block utility stayed positive, this is descriptive anti-alignment,
   not interference.
-- **B2 next**: expose separate pre-norm SA and FF candidate writes and validate full-block/native
-  parity before running sublayer causal interventions.
+- **B2 complete**: exact native-logit parity, Cycle A probability parity within `5.96e-8`,
+  192,140 component observations, and 5,400 paired causal observations across five baseline seeds.
+  SA was more useful than FF in seven of eight learned-task/layer cells; both were positively useful,
+  no intra-block repair candidate appeared, and no maximum/minimum task-conditioned contrast
+  replicated. Artifacts are under `artifacts/cycle_b/b2_sa_ff`.
+- **B3 next**: implement the preregistered static/stability, drift, autocorrelation, subspace, and
+  amplification--repair suite without reopening gating.
 
 ## Released gated-attention comparison
 

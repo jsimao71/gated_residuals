@@ -1,0 +1,32 @@
+cycle: B
+experiment: B2
+revision: 1
+description: Pre-norm self-attention versus feed-forward decomposition on frozen E1 baselines.
+source_cycle: A
+source_experiment: E1
+checkpoint_glob: results/e1/runs/seed-*/model.pt
+quality_metric: target_log_probability
+interventions:
+  - native
+  - skip_sa
+  - zero_sa_replacement
+  - skip_ff
+  - zero_ff_replacement
+  - skip_full_block
+  - norm_matched_random_sa
+  - norm_matched_random_ff
+capture:
+  token_bins: 10
+  matrix_token_scope: final_nonpadding
+  random_replacement_seed: 2601
+  zero_replacement_aliases_skip: true
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  negligible_utility: 0.002
+  specialization_effect: 0.01
+  minimum_seed_fraction: 0.8
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_b/b2_sa_ff
+

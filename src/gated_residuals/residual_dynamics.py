@@ -67,6 +67,44 @@ def cancellation_score(
     return (1.0 - numerator / denominator).clamp(0.0, 1.0)
 
 
+def sa_ff_geometry(
+    residual_pre: torch.Tensor,
+    attention_update: torch.Tensor,
+    ff_update: torch.Tensor,
+    *,
+    eps: float = 1e-8,
+) -> dict[str, torch.Tensor]:
+    """Compare pre-norm SA and FF writes at their correct residual locations."""
+    _require_same_shape(residual_pre, attention_update)
+    _require_same_shape(residual_pre, ff_update)
+    state_after_attention = residual_pre.float() + attention_update.float()
+    attention = update_geometry(residual_pre, attention_update, eps=eps)
+    ff = update_geometry(state_after_attention, ff_update, eps=eps)
+    attention_f = attention_update.float()
+    ff_f = ff_update.float()
+    combined = attention_f + ff_f
+    return {
+        "attention_update_norm": attention["update_norm"],
+        "attention_relative_update_norm": attention["relative_update_norm"],
+        "attention_state_update_cosine": attention["state_update_cosine"],
+        "attention_novelty": attention["novelty"],
+        "attention_dominance": attention["dominance"],
+        "ff_update_norm": ff["update_norm"],
+        "ff_relative_update_norm": ff["relative_update_norm"],
+        "ff_state_update_cosine": ff["state_update_cosine"],
+        "ff_novelty": ff["novelty"],
+        "ff_dominance": ff["dominance"],
+        "attention_ff_cosine": F.cosine_similarity(attention_f, ff_f, dim=-1, eps=eps),
+        "attention_ff_cancellation": cancellation_score(attention_f, ff_f, eps=eps),
+        "combined_update_norm": torch.linalg.vector_norm(combined, dim=-1),
+        "combined_vs_sum_norm": torch.linalg.vector_norm(combined, dim=-1)
+        / (
+            torch.linalg.vector_norm(attention_f, dim=-1)
+            + torch.linalg.vector_norm(ff_f, dim=-1)
+        ).clamp_min(eps),
+    }
+
+
 def pairwise_layer_matrices(
     residual_states: torch.Tensor,
     updates: torch.Tensor,
