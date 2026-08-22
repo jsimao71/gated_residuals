@@ -1,14 +1,14 @@
 \documentclass[10pt]{article}
 \usepackage[margin=.82in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,hyperref,microtype,enumitem,array}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref,microtype,enumitem,array}
 \usepackage[T1]{fontenc}
 \microtypesetup{expansion=false}
 \title{Selective Residual Computation:\\A Causal Test of Refinement, Interference, and Gating}
 \author{Jorge Sim\~ao}
-\date{Paper 1 research draft --- E1--E8 first-cycle results, August 2026}
+\date{Paper 1 research draft --- Cycle A and Cycle B1 results, August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Behavioral scores underdetermine how a language model uses depth. This paper reports the first experimental cycle of the Paper~0 dual-selection framework. Five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair, so strong interference was not supported. Same-content goal contrasts did not replicate between competence-matched tasks. Matched scalar gates saturated near open and did not improve quality, a shared goal latent predicted future utility worse than pooled ordinary residuals, and their combination did not suppress the independently labeled negative cell. Accordingly, hard skipping and the PRA factorial failed their preregistered evidence gates. A pinned pretrained headwise-gated checkpoint did not complete a real parity forward under available memory, so no pretrained metric is reported. The first cycle therefore supports distributed residual refinement in learned tasks while falsifying the proposed interference, goal-control, and selective-gating interpretations in this setting.
+Behavioral scores underdetermine how a language model uses depth. Cycle A of this first experimental test of the Paper~0 dual-selection framework found that five-seed tiny causal decoders learned maximum and minimum goals but not modulo-10 sum. Every block was positively useful on the learned tasks; the sole replicated negative-utility cell occurred on the failed task and showed no later repair, so strong interference was not supported. Matched scalar gates saturated near open and did not improve quality, and an explicit goal latent underperformed pooled ordinary residuals for predicting future utility. Cycle B1 then computed an exhaustive residual atlas over all 30 stored Cycle A checkpoints. Residual states were substantially more similar across layers than their candidate writes, and baseline writes changed from early anti-alignment to later alignment while remaining positively useful on learned tasks. This separates descriptive geometry from causal interference and validates the expanded measurement stack. SA/FF decomposition, stability, capacity expansion, task-ecology repair, and pretrained replication remain prospective Cycle B stages.
 \end{abstract}
 
 \section{Scientific objective}
@@ -216,6 +216,21 @@ The minimum pretrained plot set is: gate distributions by layer and head; gate v
 \subsection{Reproducibility and artifact contract}
 Every run stores config, seed, repository commit, environment, package versions, device/dtype, model and dataset revisions, tokenizer, context length, batch size, exact hook locations, gate semantics, and intervention mode. Derived observations retain run/model/dataset/task/example/token/layer/head identifiers and candidate/effective norms, cosines, attention statistics, quality, utility, and repair score. Large tables use Parquet; paper summaries use CSV. Raw activations are retained only when required to reproduce a derived result.
 
+\section{Cycle B---post-Cycle-A preregistration}
+Cycle A is a fixed empirical baseline, not a result to reinterpret. Its bounded conclusion is that a four-layer regime in which nearly every learned block had positive causal utility exerted little pressure for learned computational selection. The post-Cycle-A Cycle B work package was frozen before B1 result collection and tests whether this null is specific to shallow, capacity-constrained computation. Execution is ordered B1 residual atlas, B2 SA/FF decomposition, B3 stability, B4 depth/capacity sweep, B5 competence-matched task ecology, conditional B6 gating, B7 Qwen, and conditional B8/B9 Llama/Gemma replication. A later stage cannot repair invalid instrumentation from an earlier one.
+
+The registered Cycle B hypotheses are:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{H-B1 (computational slack):} effective-depth fraction $L_{\rm eff}/L$ decreases once available depth exceeds necessary depth;
+\item \textbf{H-B2 (sublayer specialization):} SA and FF writes have systematically different causal utility and residual signatures;
+\item \textbf{H-B3 (task-conditioned computation):} competence-matched tasks have different block or sub-block utility profiles;
+\item \textbf{H-B4 (stability signatures):} correct and incorrect trajectories differ in stability or replicated task-relevant repair;
+\item \textbf{H-B5 (gating pressure):} gates become selective only where redundancy or interference is measurable;
+\item \textbf{H-B6 (pretrained transfer):} at least some normalized tiny-model residual and SA/FF signatures replicate in Qwen;
+\item \textbf{H-B7 (partial cross-family regularity):} some normalized signatures persist in Llama/Gemma while others remain architecture sensitive.
+\end{enumerate}
+These hypotheses are post-Cycle-A but prospective for the Cycle B stages that test them. B1 is descriptive and validates the measurement stack; it cannot establish H-B1 or H-B2 because the stored Cycle A blocks combine SA and FF and all have depth four.
+
 \section{Staged experimental protocol}
 \subsection{Core E1: baseline residual map}
 Train tiny baseline models across seeds; capture the common metric battery; exhaustively skip individual blocks and selected groups; compute $U_l(\tau)$; identify useful, redundant, and candidate harmful blocks; search for later repair; and measure task decodability, logit trajectories, attention dilution, head/layer similarity, and temporal stability. E1 establishes whether there is an architectural pathology worth fixing.
@@ -249,7 +264,7 @@ Q=Q(k_{\rm memory},k_{\rm compute}).
 \]
 Test whether excess memory increases residual interference and whether goal modulation changes optimal retrieval breadth.
 
-\section{Results to date}
+\section{Cycle A---Initial shallow-regime tests}
 \subsection{E1: baseline residual map}
 We trained four-layer, width-64 causal residual decoders (150,758 parameters) on deterministic natural-language counterfactual families. Each content triple was paired with maximum, minimum, and modulo-10-sum goals expressed at three lexical-identifiability levels without a task-ID token. Content families were disjoint across 720 training, 180 validation, and 270 frozen test examples. Five independently initialized models used seeds 11, 22, 33, 44, and 55. Thresholds and the test split were fixed in \texttt{configs/e1\_baseline.yaml} before test analysis.
 
@@ -365,6 +380,42 @@ Because the real model never completed a forward pass, the fixture-level adapter
 \subsection{E8 eligibility: PRA factorial not run}
 The external PRA checkout contains the required memory-control implementation and 135 learned-routing checkpoints, so a memory-materialization axis exists in principle. At audit time it was an uncommitted \texttt{hybrid-pra} worktree at revision \texttt{f3aafd1500b5}; Paper~1 did not modify or silently pin that state. More importantly, E6 supplied no validated active-computation axis and E7 supplied no pretrained transfer measurements. Zero $Q(k_{\rm memory},k_{\rm compute})$ cells were evaluated. Crossing real PRA budgets with post-hoc thresholds on nearly open tiny-model gates would not test the registered dual-selection interaction. E8 is therefore a preregistered stop, with the availability audit under \texttt{results/e8}.
 
+\section{Cycle B---Residual Dynamics Atlas and Capacity Expansion}
+\subsection{B1: exhaustive residual-dynamics atlas}
+B1 reused, without retraining, all 30 stored Cycle A checkpoints: five each of baseline, matched baseline, scalar-gated, goal-plus-residual, goal-only, and goal-conditioned-gated variants. Each checkpoint was evaluated on the same 270 frozen test examples. At every non-padding token and four block locations we measured residual and candidate/effective-update norms, relative magnitude, state--update alignment, minimum novelty $1-\cos^2(x,\Delta)$, dominance, displacement, direction drift, adjacent-write cosine and normalized cancellation. Attention entropy, top-$k$ mass, effective support, sink score, evidence mass, and within-layer head similarity were computed per head. Full layer-pair residual/update cosine, cancellation, CKA, and RSA matrices used final non-padding tokens. Single-block target-log-probability utility was recomputed but Cycle A classifications were not relabeled.
+
+The run computed 1,152,840 layer--token residual observations and 4,611,360 layer--head--token attention observations. All required derived metrics were finite. To avoid committing activation-scale data, artifacts retain 32,400 per-example final-token residual rows, 201,600 stratified attention summaries, full matrix cells, seed summaries, correct/incorrect partitions, configuration, model hashes, logs, and figures; no raw activation tensor is persisted.
+
+The five baseline seeds show a consistent depth progression at the final non-padding token. Early candidate writes were anti-aligned with their entering state, while later writes were aligned:
+\begin{table}[ht]
+\centering
+\caption{B1 baseline final-token geometry across all test tasks. Intervals bootstrap five seed means. Novelty is $1-\cos^2(x,\Delta)$; direction is $\cos(x,x+\Delta)$.}
+\begin{tabular}{lrrrr}
+\toprule
+Layer & Relative norm & State--write cosine & Novelty & State direction \\
+\midrule
+0 & .572 [.527,.609] & $-.406$ [$-.449$,$-.342$] & .817 [.782,.865] & .826 [.801,.850] \\
+1 & .642 [.594,.691] & $-.105$ [$-.140$,$-.061$] & .952 [.947,.959] & .823 [.809,.837] \\
+2 & .688 [.613,.783] & .115 [.080,.142] & .954 [.947,.961] & .846 [.822,.868] \\
+3 & .603 [.519,.683] & .329 [.305,.355] & .863 [.852,.876] & .902 [.887,.919] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This sign change is not interference evidence. Cycle A found positive causal utility for every block on the learned maximum/minimum tasks, including early blocks whose writes are anti-aligned. B1 therefore supplies a direct within-project counterexample to interpreting negative cosine as harmful computation.
+
+Across the 30 stored checkpoints, off-diagonal residual-state cosine was .710 (descriptive checkpoint-bootstrap interval [.703,.718]), compared with .200 [.177,.220] for candidate updates. Residual-state CKA was likewise .652 [.641,.664], versus .288 [.264,.315] for writes; RSA gave .599 [.590,.609] versus .224 [.202,.249]. Adjacent-layer residual cosine was .838, whereas adjacent-write cosine was .227. The normalized pairwise cancellation score averaged .209 and did not by itself indicate repair or interference. These comparisons describe a persistent carrier state receiving more layer-specific writes, not a causal functional taxonomy. The 30-checkpoint intervals summarize the stored collection; some matched controls share seeds and training structure, so they are not population-level architecture intervals.
+
+Gated variants reproduced Cycle A's near-open behavior in geometric form: the mean effective-to-candidate norm ratio was .977 [.971,.981] for scalar gates and .957 [.953,.959] for goal-conditioned gates, versus exactly one for ungated variants. Correct-minus-incorrect partitions produced some isolated task/layer differences, but direction and interval exclusion were not stable across tasks and depth; the underlearned sum task also reverses the competence balance. B1 therefore does not claim a general correctness signature. B3 will test preregistered stability/repair quantities with matched difficulty rather than selecting among these atlas cells post hoc.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{../../../artifacts/cycle_b/b1_residual_atlas/figures/b1_layer_token_atlas.pdf}
+\caption{B1 layer--token atlas over correct examples from all stored Cycle A variants. Token position is binned relative to each non-padding sequence. Values are descriptive checkpoint/run summaries; causal utility remains a separate intervention quantity.}
+\end{figure}
+
+B1 passes its instrumentation gate: tensor locations are explicit, the full static battery is exercised, matrices are retained rather than collapsed to one scalar, and required outputs contain no non-finite values. The Cycle A nulls remain unchanged. B2 therefore proceeds to the mandatory separation of self-attention and feed-forward candidate writes, with native-forward and full-block parity tested before any sublayer result is accepted.
+
 \section{Primary claims, decision rules, and falsification}
 The paper starts with three nested claims.
 
@@ -391,9 +442,9 @@ This is a mechanism study, not a claim that Transformer gates instantiate biolog
 The present design cannot fully remove training-history confounds in pretrained comparisons, and block ablations may create off-distribution states. It addresses these limits through within-model interventions, closely matched release variants, graded controls, explicit tensor locations, and conservative causal language. Paper-series theory, embodied extensions, local learning, and detailed goal-latent architectures remain in Paper~0 and the roadmap.
 
 \section{Conclusion}
-The first cycle answers its bounded causal question with a constrained null. On tasks the tiny decoders learned, all four residual blocks contributed positive causal probability utility, favoring distributed refinement. The only negative cell belonged to a chance-level task and lacked repair. Competence-matched counterfactual goals did not yield replicated utility changes. Scalar gates remained nearly open, forcing them open barely changed behavior, and neither gate-only nor goal-conditioned gating improved quality or selected independently useful computation. The shared latent also failed the stronger future-utility test against ordinary residual summaries.
+Cycle A answers its bounded causal question with a constrained null. On tasks the tiny decoders learned, all four residual blocks contributed positive causal probability utility, while the only negative cell belonged to a chance-level task and lacked repair. Competence-matched counterfactual goals did not yield replicated utility changes. Scalar gates remained nearly open, neither gated variant improved quality or selected independently useful computation, and the explicit goal latent failed the stronger future-utility test against ordinary residual summaries.
 
-These results weaken residual interference, a distinct shared task-control state, mechanistic inhibition, and sufficient activation for this model/task regime. They do not show that those mechanisms are impossible, nor do they evaluate the released pretrained gated-attention model. A second cycle would first require a competence-matched task ecology, thresholds frozen before its new test split, and a mechanism that exhibits nontrivial selection on validation data. Until those conditions hold, expanding hard-skip, pretrained, or PRA-factorial claims would convert exploratory tuning into unsupported confirmation. The defensible contribution of this cycle is the falsifiable instrumentation, the replicated refinement map, and the preserved negative outcomes.
+Cycle B1 expands what is known without rewriting that null. Across all stored models, the residual carrier changes more smoothly across depth than the candidate writes, and early anti-alignment coexists with positive learned-task utility. The result validates an exhaustive, architecture-neutral geometry and attention atlas while demonstrating why geometry alone cannot name interference. It does not yet test computational slack, SA/FF specialization, temporal repair, or pretrained transfer. Those questions remain assigned to the preregistered B2--B9 sequence, with gating reopened only if redundancy, negative utility, task-conditioned specialization, or replicated repair is first observed.
 
 \begin{thebibliography}{9}
 \bibitem{kornblith2019cka}

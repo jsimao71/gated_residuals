@@ -1,0 +1,23 @@
+cycle: B
+experiment: B1
+revision: 1
+description: Exhaustive residual-dynamics atlas over all stored Cycle A tiny-model checkpoints.
+source_cycle: A
+source_split: test
+checkpoint_globs:
+  - results/e1/runs/seed-*/model.pt
+  - results/e3/runs/*/seed-*/model.pt
+  - results/e4/runs/*/seed-*/model.pt
+  - results/e5/runs/seed-*/model.pt
+capture:
+  token_bins: 10
+  attention_topk: 5
+  matrix_token_scope: final_nonpadding
+  raw_activations_persisted: false
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_b/b1_residual_atlas
+

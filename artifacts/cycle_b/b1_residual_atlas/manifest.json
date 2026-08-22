@@ -1,0 +1,63 @@
+{
+  "argv": [
+    "scripts\\run_b1.py"
+  ],
+  "config": {
+    "capture": {
+      "attention_topk": 5,
+      "matrix_token_scope": "final_nonpadding",
+      "raw_activations_persisted": false,
+      "token_bins": 10
+    },
+    "checkpoint_globs": [
+      "results/e1/runs/seed-*/model.pt",
+      "results/e3/runs/*/seed-*/model.pt",
+      "results/e4/runs/*/seed-*/model.pt",
+      "results/e5/runs/seed-*/model.pt"
+    ],
+    "cycle": "B",
+    "description": "Exhaustive residual-dynamics atlas over all stored Cycle A tiny-model checkpoints.",
+    "experiment": "B1",
+    "output": {
+      "directory": "artifacts/cycle_b/b1_residual_atlas"
+    },
+    "revision": 1,
+    "source_cycle": "A",
+    "source_split": "test",
+    "statistics": {
+      "bootstrap_samples": 2000,
+      "confidence": 0.95,
+      "final_test_frozen": true
+    }
+  },
+  "metadata": {
+    "batch_size": 64,
+    "commit_hash": "c0dd6765329c25be9db1249a8533178a94fda91d",
+    "context_length": 56,
+    "dataset": "synthetic_counterfactual_v1",
+    "dataset_revision": null,
+    "device": "cuda",
+    "dtype": "float32",
+    "environment": {},
+    "gate_tensor_semantics": "[batch, 1] scalar block gate, repeated across tokens",
+    "hook_locations": {
+      "attention_weights": "TinyOutput.attention[layer]",
+      "candidate_update": "TinyOutput.candidates[layer]",
+      "effective_update": "TinyOutput.effective_updates[layer]",
+      "residual_post": "TinyOutput.states[layer + 1]",
+      "residual_pre": "TinyOutput.states[layer]"
+    },
+    "intervention": "native_and_single_block_skip",
+    "model": "tiny_residual_decoder",
+    "model_revision": null,
+    "model_variant": "all_cycle_a_variants",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.10.11",
+    "repository_dirty": true,
+    "run_id": "cycle-b-b1-residual-atlas",
+    "seed": 0,
+    "tokenizer": null,
+    "torch_version": "2.12.1+cu126",
+    "transformers_version": "4.55.4"
+  }
+}

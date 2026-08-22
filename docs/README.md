@@ -11,6 +11,11 @@ Paper 1 is the first experimental instantiation. It tests whether Transformer re
 refine, complement, or interfere with task-conditioned trajectories, and whether explicit gates
 select updates with independently measurable downstream consequences.
 
+Cycle B now extends that fixed first-cycle baseline. B1 is complete: the exhaustive residual atlas
+was run over all 30 stored Cycle A checkpoints before any new training. B2 next separates
+self-attention and feed-forward writes; later depth, task-ecology, gating, and pretrained stages
+remain evidence and instrumentation gated.
+
 Start with:
 
 - `papers/paper0/paper0_selective_computation_position.tex` — position and measurement framework;
@@ -98,6 +103,7 @@ PYTHONPATH=src python scripts/run_e5.py
 PYTHONPATH=src python scripts/run_e6.py
 HF_HOME=/path/to/hf-cache PYTHONPATH=src python scripts/run_e7.py
 PYTHONPATH=src python scripts/run_e8.py
+PYTHONPATH=src python scripts/run_b1.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -111,6 +117,23 @@ E6 is an evidence-gated audit; it does not run hard-skip sweeps when prior crite
 E7 records scientific and exact-checkpoint resource eligibility. It never emits pretrained metrics
 unless a real native-parity forward has completed.
 E8 audits both factorial axes and does not modify the external PRA checkout.
+B1 reuses all E1/E3/E4/E5 checkpoints and writes compact derived Parquet tables, CSV summaries,
+full layer-pair matrices, and a layer-by-token atlas under
+`artifacts/cycle_b/b1_residual_atlas`. It computes per-example/token/head quantities but does not
+persist raw activation tensors. Pass `--max-checkpoints 1 --output tmp/b1-smoke` for a bounded
+instrumentation smoke run.
+
+## Cycle B status
+
+- **B1 complete**: 30 checkpoints, 1,152,840 residual observations, 4,611,360 head-level attention
+  observations, and zero non-finite required metrics.
+- Residual states were more similar across layers than candidate writes (off-diagonal cosine
+  0.710 versus 0.200; CKA 0.652 versus 0.288).
+- Baseline final-token state--write cosine progressed from -0.406 at layer 0 to 0.329 at layer 3.
+  Because Cycle A learned-task block utility stayed positive, this is descriptive anti-alignment,
+  not interference.
+- **B2 next**: expose separate pre-norm SA and FF candidate writes and validate full-block/native
+  parity before running sublayer causal interventions.
 
 ## Released gated-attention comparison
 

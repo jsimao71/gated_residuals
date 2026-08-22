@@ -1,0 +1,20 @@
+implementation,metric_family,status
+residual_norm,state magnitude,implemented_and_run
+candidate_update_norm,candidate update magnitude,implemented_and_run
+effective_update_norm,effective update magnitude,implemented_and_run
+relative_update_norm,relative update magnitude,implemented_and_run
+candidate_cosine,state/update alignment,implemented_and_run
+adjacent_update_cosine,inter-update alignment,implemented_and_run
+adjacent_cancellation,cancellation/reinforcement,implemented_and_run
+candidate_novelty,minimum novelty,implemented_and_run
+recent_subspace_novelty,recent-update-subspace novelty,deferred_to_B3
+candidate_dominance,dominance,implemented_and_run
+effective_displacement,effective displacement,implemented_and_run
+representation_direction_cosine,representation direction drift,implemented_and_run
+residual_state_cosine,residual-state cosine matrix,implemented_and_run
+update_cosine,update cosine matrix,implemented_and_run
+residual_state_cka/update_cka,CKA matrices,implemented_and_run
+residual_state_rsa/update_rsa,RSA matrices,implemented_and_run
+entropy/top-k/support/sink,attention concentration,implemented_and_run
+attention_evidence_mass,synthetic evidence mass,implemented_and_run
+head_output_norm,per-head output norm,requires_B2_capture

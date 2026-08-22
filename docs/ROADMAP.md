@@ -18,6 +18,9 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   distinct future-utility-predicting goal state were not supported.
 - E6 and E8 stopped at their preregistered evidence gates. E7 also stopped before a real pretrained
   parity forward because the exact checkpoint exceeded available host/device memory.
+- Cycle B is active under a separately frozen post-Cycle-A work package. B1 completed the static
+  residual atlas over all 30 stored Cycle A checkpoints with validated finite outputs; B2 SA/FF
+  decomposition is the next instrumentation gate.
 
 ## Proposed series
 
@@ -93,8 +96,12 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Design a second-cycle competence-matched task ecology in which every retained goal is learned.
-2. Freeze its family split and effect thresholds before new confirmatory test inspection.
-3. Require nontrivial validation-set gate variation before reopening hard-skip sweeps.
-4. Run the pinned pretrained pair only on hardware that completes real native-forward parity.
-5. Keep Papers 2--5 evidence-conditional; the first cycle does not support expanding their claims.
+1. Complete B2's numerically exact SA/FF capture and sublayer intervention API on the tiny model.
+2. Run B3's token/depth stability, drift, subspace, and amplification--repair atlas.
+3. Train the B4 depth series only after B2/B3 instrumentation passes its analytic and parity tests.
+4. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
+5. Reopen gating only if B2--B5 exposes reliable redundancy, negative utility, task-conditioned
+   roles, repair, or depth slack.
+6. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
+   extend the same adapter semantics to Llama and Gemma if resource use is manageable.
+7. Keep Papers 2--5 evidence-conditional; Cycle A and B1 do not support expanding their claims.

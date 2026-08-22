@@ -9,7 +9,9 @@ from gated_residuals.gate_metrics import gate_metric_correlations, gate_summary,
 from gated_residuals.head_layer_similarity import head_layer_organization
 from gated_residuals.residual_dynamics import (
     amplification_repair,
+    cancellation_score,
     causal_block_utility,
+    pairwise_layer_matrices,
     update_geometry,
 )
 from gated_residuals.temporal_stability import (
@@ -29,10 +31,35 @@ def test_residual_geometry_and_utility_are_analytic():
     assert torch.allclose(metrics["residual_norm"], torch.tensor([[5.0, 1.0]]))
     assert torch.allclose(metrics["update_norm"], torch.tensor([[5.0, 1.0]]))
     assert torch.allclose(metrics["state_update_cosine"], torch.tensor([[0.8, -1.0]]))
+    assert torch.allclose(metrics["novelty"], torch.tensor([[0.36, 0.0]]))
+    assert torch.allclose(metrics["dominance"], torch.tensor([[0.5, 0.5]]))
+    assert metrics["representation_direction_cosine"][0, 1] == pytest.approx(0.0)
     assert torch.allclose(
         causal_block_utility(torch.tensor([0.8, 0.4]), torch.tensor([0.7, 0.6])),
         torch.tensor([0.1, -0.2]),
     )
+
+
+def test_cancellation_and_full_layer_matrices_are_analytic():
+    first = torch.tensor([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
+    assert torch.allclose(cancellation_score(first, first), torch.zeros(3))
+    assert torch.allclose(cancellation_score(first, -first), torch.ones(3))
+    states = torch.stack([first, first * 2.0])
+    updates = torch.stack([first, -first])
+    matrices = pairwise_layer_matrices(states, updates)
+    assert set(matrices) == {
+        "residual_state_cosine",
+        "update_cosine",
+        "update_cancellation",
+        "residual_state_cka",
+        "update_cka",
+        "residual_state_rsa",
+        "update_rsa",
+    }
+    assert matrices["residual_state_cosine"][0, 1] == pytest.approx(1.0)
+    assert matrices["update_cosine"][0, 1] == pytest.approx(-1.0)
+    assert matrices["update_cancellation"][0, 1] == pytest.approx(1.0)
+    assert matrices["residual_state_cka"][0, 1] == pytest.approx(1.0)
 
 
 def test_amplification_repair_requires_growth_then_recovery():
