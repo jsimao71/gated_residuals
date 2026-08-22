@@ -110,6 +110,7 @@ PYTHONPATH=src python scripts/run_b2.py
 PYTHONPATH=src python scripts/run_b3.py
 PYTHONPATH=src python scripts/run_b4.py
 PYTHONPATH=src python scripts/run_b5.py
+PYTHONPATH=src python scripts/run_b6.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -160,8 +161,15 @@ instrumentation smoke run.
   and FF utility, while ordinary-residual goal-probe accuracy peaked at 0.739 mid-depth (chance
   0.20). B6 is now enabled by task-conditioned and negative-utility evidence, not by repair.
   Artifacts are under `artifacts/cycle_b/b5_task_ecology`.
-- **B6 next**: test input-conditioned block and optional SA/FF gates on the evidence-selected deep
-  condition, including forced-open/closed/shuffled controls and gate--utility alignment.
+- **B6 complete**: ten deep gated runs compared whole-block and SA/FF-specific gates. Native
+  accuracy (0.991/0.993) matched the B5 baseline (0.992); forcing component gates open reduced
+  accuracy by 0.024 and shuffling reduced it by 0.028. Mean block-equivalent gates were 0.797 and
+  0.757, but gate--candidate-norm correlations exceeded gate--utility correlations. The negative
+  minimum layer-8 FF effect persisted, and all soft-gated candidates were still evaluated. B6
+  supports functional amplitude modulation, not quality improvement or compute saving. Artifacts
+  are under `artifacts/cycle_b/b6_gating`.
+- **B7 next**: re-audit the smallest practical Qwen baseline/gated pair and run only if exact native
+  parity fits available host/device memory.
 
 ## Released gated-attention comparison
 

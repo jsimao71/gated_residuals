@@ -32,6 +32,9 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   pilots. All ten task pairs matched; 13 task-conditioned block/SA utility contrasts replicated,
   and minimum layer 8 had negative block/FF utility. B6 is evidence-enabled, while repair and
   strong interference remain unsupported.
+- B6 completed five whole-block and five SA/FF-gated deep runs. Native quality matched baseline;
+  forced-open/mean/shuffled interventions showed functional modulation, but magnitude predicted
+  gates better than causal utility, the negative cell persisted, and soft gates saved no compute.
 
 ## Proposed series
 
@@ -107,9 +110,9 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Run B6 on the evidence-selected 16-layer condition with block and SA/FF gate controls.
-2. Test whether learned gate values align with B5 causal utility rather than update magnitude alone.
-3. Retain the no-repair boundary unless a new joint vector-plus-task recovery result replicates.
+1. Re-audit and attempt B7 on the smallest practical Qwen baseline/gated comparison.
+2. Stop B7 before metrics if exact native parity cannot fit available host/device memory.
+3. Retain the no-repair and no-compute-saving boundaries in cross-model interpretation.
 4. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
    extend the same adapter semantics to Llama and Gemma if resource use is manageable.
-5. Keep Papers 2--5 evidence-conditional; Cycle A through B5 do not support expanding their claims.
+5. Keep Papers 2--5 evidence-conditional; Cycle A through B6 do not support expanding their claims.

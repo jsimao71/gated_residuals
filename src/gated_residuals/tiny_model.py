@@ -20,6 +20,8 @@ class TinyOutput:
     ff_candidates: list[torch.Tensor] = field(default_factory=list)
     ff_effective_updates: list[torch.Tensor] = field(default_factory=list)
     gates: list[torch.Tensor] = field(default_factory=list)
+    attention_gates: list[torch.Tensor] = field(default_factory=list)
+    ff_gates: list[torch.Tensor] = field(default_factory=list)
     attention: list[torch.Tensor] = field(default_factory=list)
     goal_states: list[torch.Tensor] = field(default_factory=list)
     active: list[torch.Tensor] = field(default_factory=list)
@@ -93,7 +95,7 @@ class TinyResidualDecoder(nn.Module):
         goal_width: int = 24,
     ):
         super().__init__()
-        if variant not in {"baseline", "matched_baseline", "gated", "goal", "goal_only", "goal_gated"}:
+        if variant not in {"baseline", "matched_baseline", "gated", "sa_ff_gated", "goal", "goal_only", "goal_gated"}:
             raise ValueError(f"unknown tiny-model variant: {variant}")
         self.variant = variant
         self.width = width
@@ -117,6 +119,13 @@ class TinyResidualDecoder(nn.Module):
             gate_input = goal_width if variant == "goal_gated" else width
             self.gates = nn.ModuleList([nn.Linear(gate_input, 1) for _ in range(layers)])
             for gate in self.gates:
+                nn.init.zeros_(gate.weight)
+                nn.init.constant_(gate.bias, 2.0)
+        self.has_component_gates = variant == "sa_ff_gated"
+        if self.has_component_gates:
+            self.attention_gates = nn.ModuleList([nn.Linear(width, 1) for _ in range(layers)])
+            self.ff_gates = nn.ModuleList([nn.Linear(width, 1) for _ in range(layers)])
+            for gate in (*self.attention_gates, *self.ff_gates):
                 nn.init.zeros_(gate.weight)
                 nn.init.constant_(gate.bias, 2.0)
         if variant == "matched_baseline":
@@ -147,6 +156,8 @@ class TinyResidualDecoder(nn.Module):
         intervention_seed: int = 0,
         gate_mode: str = "native",
         gate_overrides: list[torch.Tensor] | None = None,
+        attention_gate_overrides: list[torch.Tensor] | None = None,
+        ff_gate_overrides: list[torch.Tensor] | None = None,
         goal_mode: str = "native",
         hard_threshold: float | None = None,
         capture: bool = False,
@@ -187,7 +198,17 @@ class TinyResidualDecoder(nn.Module):
                     attention_candidate,
                     seed=int(intervention_seed) + 104729 * (layer_index + 1),
                 )
-            state_after_attention = residual_input + attention_applied
+            attention_gate = torch.ones((state.size(0), 1), device=state.device, dtype=state.dtype)
+            if self.has_component_gates:
+                attention_gate = torch.sigmoid(self.attention_gates[layer_index](summary))
+                if gate_mode == "open": attention_gate = torch.ones_like(attention_gate)
+                elif gate_mode == "closed": attention_gate = torch.zeros_like(attention_gate)
+                elif gate_mode != "native": raise ValueError(f"unsupported gate mode: {gate_mode}")
+                if attention_gate_overrides is not None:
+                    attention_gate = attention_gate_overrides[layer_index].to(device=state.device, dtype=state.dtype)
+                if layer_index in skip_layers: attention_gate = torch.zeros_like(attention_gate)
+            attention_effective = attention_gate[:, None, :] * attention_applied
+            state_after_attention = residual_input + attention_effective
             ff_candidate = block.ff_candidate(state_after_attention)
             ff_applied = ff_candidate
             if layer_index in skip_ff_layers:
@@ -197,6 +218,17 @@ class TinyResidualDecoder(nn.Module):
                     ff_candidate,
                     seed=int(intervention_seed) + 130363 * (layer_index + 1),
                 )
+            ff_gate = torch.ones((state.size(0), 1), device=state.device, dtype=state.dtype)
+            if self.has_component_gates:
+                ff_summary = self._last_token(state_after_attention, attention_mask)
+                ff_gate = torch.sigmoid(self.ff_gates[layer_index](ff_summary))
+                if gate_mode == "open": ff_gate = torch.ones_like(ff_gate)
+                elif gate_mode == "closed": ff_gate = torch.zeros_like(ff_gate)
+                elif gate_mode != "native": raise ValueError(f"unsupported gate mode: {gate_mode}")
+                if ff_gate_overrides is not None:
+                    ff_gate = ff_gate_overrides[layer_index].to(device=state.device, dtype=state.dtype)
+                if layer_index in skip_layers: ff_gate = torch.zeros_like(ff_gate)
+            ff_effective = ff_gate[:, None, :] * ff_applied
             candidate = attention_applied + ff_applied
             if self.has_gate:
                 gate_source = goal if self.variant == "goal_gated" else summary
@@ -229,9 +261,13 @@ class TinyResidualDecoder(nn.Module):
                 # This implementation batches the candidate computation; active FLOPs are
                 # theoretical. Realized conditional execution is measured separately.
                 gate = active.to(gate.dtype)
-            effective = gate[:, None, :] * candidate
-            attention_effective = gate[:, None, :] * attention_applied
-            ff_effective = gate[:, None, :] * ff_applied
+            if self.has_component_gates:
+                effective = attention_effective + ff_effective
+                gate = (attention_gate + ff_gate) / 2
+            else:
+                effective = gate[:, None, :] * candidate
+                attention_effective = gate[:, None, :] * attention_applied
+                ff_effective = gate[:, None, :] * ff_applied
             state = residual_input + effective
             if capture:
                 output.candidates.append(candidate.detach())
@@ -242,6 +278,8 @@ class TinyResidualDecoder(nn.Module):
                 output.ff_candidates.append(ff_candidate.detach())
                 output.ff_effective_updates.append(ff_effective.detach())
                 output.gates.append(gate.detach())
+                output.attention_gates.append(attention_gate.detach())
+                output.ff_gates.append(ff_gate.detach())
                 output.attention.append(attention.detach())
                 output.active.append(active.detach())
                 output.states.append(state.detach())

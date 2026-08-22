@@ -1,0 +1,51 @@
+{
+  "cycle": "B",
+  "experiment": "B6",
+  "revision": 1,
+  "source_commit": "4c773de5e43b275993701032bc21933f158a1663",
+  "runs": 10,
+  "quality_rows": 15000,
+  "causal_rows": 48000,
+  "native_capture_max_logit_error": 0.0,
+  "native_accuracy_by_variant": {
+    "gated": 0.9913333535194397,
+    "sa_ff_gated": 0.9926666617393494
+  },
+  "native_minus_baseline_by_variant": {
+    "gated": -0.0006666667759418488,
+    "sa_ff_gated": 0.0006666666828095913
+  },
+  "open_minus_native_by_variant": {
+    "gated": -0.012000012397766158,
+    "sa_ff_gated": -0.024000000953674272
+  },
+  "mean_gate_by_variant": {
+    "gated": 0.7969507768153707,
+    "sa_ff_gated": 0.7570791833210582
+  },
+  "mean_gate_utility_spearman_by_variant": {
+    "gated": 0.2587341547029375,
+    "sa_ff_gated": 0.20002137540843407
+  },
+  "mean_gate_candidate_norm_spearman_by_variant": {
+    "gated": 0.42561391626550005,
+    "sa_ff_gated": 0.33267309030015185
+  },
+  "minimum_layer8": {
+    "gated": {
+      "gate_block_mean": 0.8261274260406692,
+      "gate_ff_mean": 1.0,
+      "utility_block_mean": -0.011078628370693575,
+      "utility_ff_mean": -0.002384426125790924
+    },
+    "sa_ff_gated": {
+      "gate_block_mean": 0.7237861800193787,
+      "gate_ff_mean": 0.6529573311749847,
+      "utility_block_mean": -0.02357610736740753,
+      "utility_ff_mean": -0.014034356880777827
+    }
+  },
+  "elapsed_seconds": null,
+  "postprocess_elapsed_seconds": 11.222921199863777,
+  "interpretation": "Gates are interpreted as computational selection only when they align with independent causal utility or improve quality under interventions; soft gates do not imply FLOP savings."
+}
