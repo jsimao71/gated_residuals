@@ -14,8 +14,8 @@ select updates with independently measurable downstream consequences.
 Cycle B now extends that fixed first-cycle baseline. B1 ran the exhaustive residual atlas over all
 30 stored Cycle A checkpoints before new training. B2 is also complete: self-attention and
 feed-forward writes are captured at distinct pre-norm locations and intervened on separately with
-exact native parity. Later stability, depth, task-ecology, gating, and pretrained stages remain
-evidence and instrumentation gated.
+exact native parity. B3's stability and amplification--repair atlas is complete. Later depth,
+task-ecology, gating, and pretrained stages remain evidence and instrumentation gated.
 
 Start with:
 
@@ -106,6 +106,7 @@ HF_HOME=/path/to/hf-cache PYTHONPATH=src python scripts/run_e7.py
 PYTHONPATH=src python scripts/run_e8.py
 PYTHONPATH=src python scripts/run_b1.py
 PYTHONPATH=src python scripts/run_b2.py
+PYTHONPATH=src python scripts/run_b3.py
 ```
 
 E1 uses five seeds and a frozen, content-family-disjoint test split. Pass
@@ -139,8 +140,12 @@ instrumentation smoke run.
   SA was more useful than FF in seven of eight learned-task/layer cells; both were positively useful,
   no intra-block repair candidate appeared, and no maximum/minimum task-conditioned contrast
   replicated. Artifacts are under `artifacts/cycle_b/b2_sa_ff`.
-- **B3 next**: implement the preregistered static/stability, drift, autocorrelation, subspace, and
-  amplification--repair suite without reopening gating.
+- **B3 complete**: 5,400 stability records and 12,150 intervention trajectories. Twenty-three
+  exploratory correct/incorrect cells replicated and concentrated in late FF statistics, but no
+  perturbation showed both vector recovery and task-gap recovery. H-B4 remains unconfirmed and the
+  B6 gating gate stays closed. Artifacts are under `artifacts/cycle_b/b3_stability`.
+- **B4 next**: train the registered 4/8/12/16-layer capacity series and test effective-depth
+  fraction, redundancy, sublayer utility, and matched-parameter controls.
 
 ## Released gated-attention comparison
 

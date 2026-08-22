@@ -1,0 +1,22 @@
+cycle: B
+experiment: B3
+revision: 1
+description: Token/depth stationarity and intervention-induced amplification-repair atlas.
+checkpoint_glob: results/e1/runs/seed-*/model.pt
+capture:
+  rolling_windows: [4, 8, 16]
+  max_lag: 4
+  subspace_rank: 3
+  repair_interventions: [skip_sa, skip_ff, skip_block]
+statistics:
+  confidence: 0.95
+  bootstrap_samples: 2000
+  minimum_standardized_correctness_effect: 0.2
+  minimum_seed_fraction: 0.8
+  amplification_ratio: 1.25
+  repair_fraction: 0.25
+  repeated_repair_rate: 0.25
+  final_test_frozen: true
+output:
+  directory: artifacts/cycle_b/b3_stability
+

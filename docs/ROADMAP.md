@@ -22,6 +22,9 @@ The existing repository already has a strong Paper 1 draft and a Paper 1 `AGENTS
   residual atlas over all 30 stored Cycle A checkpoints with validated finite outputs. B2 then
   completed exact-parity SA/FF decomposition: seven of eight competent task--layer cells had
   replicated SA $>$ FF utility, but both sublayers were useful and no repair candidate appeared.
+- B3 completed the token/depth stability and causal repair atlas. Late FF-norm correctness effects
+  replicated exploratorily, but zero of 12,150 perturbations met joint vector and task-gap recovery;
+  gating remains closed pending depth/task evidence.
 
 ## Proposed series
 
@@ -97,11 +100,10 @@ Tests whether broad memory activation plus computational gating improves recall 
 
 ## Immediate implementation priority
 
-1. Run B3's token/depth stability, drift, subspace, and amplification--repair atlas.
-2. Train the B4 depth series only after B3 instrumentation passes its analytic tests.
-3. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
-4. Reopen gating only if B2--B5 exposes reliable redundancy, negative utility, task-conditioned
+1. Train the B4 depth series and matched-parameter control now that B3 instrumentation has passed.
+2. Freeze B5's competence-matched task ecology and effect thresholds before its new test split.
+3. Reopen gating only if B2--B5 exposes reliable redundancy, negative utility, task-conditioned
    roles, repair, or depth slack.
-5. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
+4. Run the pinned pretrained pair only on hardware that completes real native-forward parity, then
    extend the same adapter semantics to Llama and Gemma if resource use is manageable.
-6. Keep Papers 2--5 evidence-conditional; Cycle A through B2 do not support expanding their claims.
+5. Keep Papers 2--5 evidence-conditional; Cycle A through B3 do not support expanding their claims.

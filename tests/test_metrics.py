@@ -18,10 +18,17 @@ from gated_residuals.residual_dynamics import (
 from gated_residuals.temporal_stability import (
     autocorrelation,
     covariance_drift,
+    eigenspectrum_drift,
+    first_second_differences,
+    lagged_cross_correlation,
     linear_cka,
+    mean_shift,
     principal_subspace_drift,
+    rbf_mmd,
     representational_similarity,
     rolling_moments,
+    stable_rank,
+    wasserstein_1d,
 )
 
 
@@ -138,6 +145,24 @@ def test_temporal_statistics_known_cases():
     assert representational_similarity(matrix, matrix) == pytest.approx(1.0)
     assert covariance_drift(matrix, matrix) == pytest.approx(0.0)
     assert principal_subspace_drift(matrix, matrix, rank=2) == pytest.approx(0.0, abs=1e-4)
+
+
+def test_extended_stability_metrics_known_cases():
+    series = torch.arange(6, dtype=torch.float32)
+    differences = first_second_differences(series)
+    assert torch.allclose(differences["first_difference"], torch.ones(5))
+    assert torch.allclose(differences["second_difference"], torch.zeros(4))
+    lags, correlations = lagged_cross_correlation(series, series, 2)
+    assert torch.equal(lags, torch.tensor([-2, -1, 0, 1, 2]))
+    assert correlations[2] == pytest.approx(1.0)
+    first = torch.tensor([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]])
+    shifted = first + 1
+    assert mean_shift(first, first) == pytest.approx(0.0)
+    assert wasserstein_1d(series, series + 2) == pytest.approx(2.0)
+    assert rbf_mmd(first, first) == pytest.approx(0.0)
+    assert eigenspectrum_drift(first, first) == pytest.approx(0.0)
+    assert stable_rank(first) == pytest.approx(1.0)
+    assert mean_shift(first, shifted) > 0
 
 
 def test_head_layer_organization_returns_finite_contrast():

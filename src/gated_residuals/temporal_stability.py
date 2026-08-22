@@ -5,6 +5,45 @@ from __future__ import annotations
 import torch
 
 
+def first_second_differences(
+    series: torch.Tensor, *, token_dim: int = -1
+) -> dict[str, torch.Tensor]:
+    """Return first and second differences along an explicit token axis."""
+    values = series.detach().float()
+    if values.shape[token_dim] < 3:
+        raise ValueError("need at least three tokens for second differences")
+    return {
+        "first_difference": torch.diff(values, dim=token_dim),
+        "second_difference": torch.diff(values, n=2, dim=token_dim),
+    }
+
+
+def lagged_cross_correlation(
+    left: torch.Tensor,
+    right: torch.Tensor,
+    max_lag: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Pearson cross-correlation for scalar series at lags ``[-max_lag, max_lag]``."""
+    if left.ndim != 1 or right.ndim != 1 or left.shape != right.shape:
+        raise ValueError("cross-correlation expects matched one-dimensional series")
+    if max_lag < 0 or max_lag >= left.numel() - 1:
+        raise ValueError("max_lag must leave at least two paired observations")
+    values = []
+    lags = torch.arange(-max_lag, max_lag + 1)
+    for lag in lags.tolist():
+        if lag < 0:
+            x, y = left[-lag:], right[:lag]
+        elif lag > 0:
+            x, y = left[:-lag], right[lag:]
+        else:
+            x, y = left, right
+        x = x.float() - x.float().mean()
+        y = y.float() - y.float().mean()
+        denominator = torch.linalg.vector_norm(x) * torch.linalg.vector_norm(y)
+        values.append((x @ y) / denominator.clamp_min(1e-8))
+    return lags, torch.stack(values)
+
+
 def rolling_moments(series: torch.Tensor, window: int, *, token_dim: int = -2) -> dict[str, torch.Tensor]:
     """Rolling mean/variance/skewness/kurtosis and first/second mean differences."""
     values = series.detach().float().movedim(token_dim, -2)
@@ -99,6 +138,74 @@ def covariance_drift(first: torch.Tensor, second: torch.Tensor) -> torch.Tensor:
     cov_first = first_centered.T @ first_centered / max(first.shape[0] - 1, 1)
     cov_second = second_centered.T @ second_centered / max(second.shape[0] - 1, 1)
     return torch.linalg.matrix_norm(cov_second - cov_first) / torch.linalg.matrix_norm(cov_first).clamp_min(1e-8)
+
+
+def mean_shift(first: torch.Tensor, second: torch.Tensor) -> torch.Tensor:
+    """Feature-mean displacement normalized by the first window's RMS scale."""
+    if first.ndim != 2 or second.ndim != 2 or first.shape[1] != second.shape[1]:
+        raise ValueError("mean shift expects [observation, feature] matrices")
+    displacement = torch.linalg.vector_norm(second.float().mean(0) - first.float().mean(0))
+    scale = first.float().square().mean().sqrt().clamp_min(1e-8)
+    return displacement / scale
+
+
+def wasserstein_1d(first: torch.Tensor, second: torch.Tensor, *, quantiles: int = 101) -> torch.Tensor:
+    """Empirical one-dimensional Wasserstein-1 distance on a common quantile grid."""
+    if first.numel() < 2 or second.numel() < 2 or quantiles < 2:
+        raise ValueError("Wasserstein distance requires two samples per window")
+    grid = torch.linspace(0, 1, quantiles, device=first.device)
+    return (
+        torch.quantile(first.detach().float().flatten(), grid)
+        - torch.quantile(second.detach().float().flatten(), grid)
+    ).abs().mean()
+
+
+def rbf_mmd(
+    first: torch.Tensor,
+    second: torch.Tensor,
+    *,
+    bandwidth: float | None = None,
+) -> torch.Tensor:
+    """Biased RBF maximum mean discrepancy for two observation matrices."""
+    if first.ndim != 2 or second.ndim != 2 or first.shape[1] != second.shape[1]:
+        raise ValueError("MMD expects [observation, feature] matrices")
+    joined = torch.cat([first.detach().float(), second.detach().float()])
+    distances = torch.cdist(joined, joined).square()
+    if bandwidth is None:
+        positive = distances[distances > 0]
+        bandwidth_t = positive.median() if positive.numel() else torch.tensor(1.0)
+    else:
+        bandwidth_t = torch.tensor(float(bandwidth), device=joined.device)
+    bandwidth_t = bandwidth_t.clamp_min(1e-8)
+    kernel = torch.exp(-distances / (2 * bandwidth_t))
+    size_first = first.shape[0]
+    return (
+        kernel[:size_first, :size_first].mean()
+        + kernel[size_first:, size_first:].mean()
+        - 2 * kernel[:size_first, size_first:].mean()
+    )
+
+
+def eigenspectrum_drift(first: torch.Tensor, second: torch.Tensor) -> torch.Tensor:
+    """L1 drift between covariance eigenspectra normalized to unit mass."""
+    if first.ndim != 2 or second.ndim != 2 or first.shape[1] != second.shape[1]:
+        raise ValueError("eigenspectrum drift expects [observation, feature] matrices")
+    spectra = []
+    for values in (first, second):
+        centered = values.float() - values.float().mean(0)
+        covariance = centered.T @ centered / max(values.shape[0] - 1, 1)
+        spectrum = torch.linalg.eigvalsh(covariance).clamp_min(0)
+        spectra.append(spectrum / spectrum.sum().clamp_min(1e-8))
+    return (spectra[0] - spectra[1]).abs().sum()
+
+
+def stable_rank(values: torch.Tensor) -> torch.Tensor:
+    """Squared Frobenius norm divided by squared spectral norm after centering."""
+    if values.ndim != 2:
+        raise ValueError("stable rank expects [observation, feature]")
+    centered = values.float() - values.float().mean(0)
+    singular = torch.linalg.svdvals(centered)
+    return singular.square().sum() / singular.square().max().clamp_min(1e-8)
 
 
 def principal_subspace_drift(first: torch.Tensor, second: torch.Tensor, rank: int) -> torch.Tensor:

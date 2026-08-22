@@ -1,0 +1,6 @@
+checkpoint,device,elapsed_seconds,repair_rows,run_id,seed,source_commit,stability_rows
+results/e1/runs/seed-11/model.pt,cuda,33.68708569998853,2430,cycleA-e1-baseline-seed-11,11,2634a5f6b8ebc6524d141bf6c99bb44d95c3e769,1080
+results/e1/runs/seed-22/model.pt,cuda,33.915125200059265,2430,cycleA-e1-baseline-seed-22,22,2634a5f6b8ebc6524d141bf6c99bb44d95c3e769,1080
+results/e1/runs/seed-33/model.pt,cuda,34.187821300001815,2430,cycleA-e1-baseline-seed-33,33,2634a5f6b8ebc6524d141bf6c99bb44d95c3e769,1080
+results/e1/runs/seed-44/model.pt,cuda,34.219422900117934,2430,cycleA-e1-baseline-seed-44,44,2634a5f6b8ebc6524d141bf6c99bb44d95c3e769,1080
+results/e1/runs/seed-55/model.pt,cuda,34.815448399866,2430,cycleA-e1-baseline-seed-55,55,2634a5f6b8ebc6524d141bf6c99bb44d95c3e769,1080
